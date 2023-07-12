@@ -33,6 +33,7 @@
         <v-container>
             <maps-card></maps-card>
         </v-container>
+       
         <v-container>
             <review-card></review-card>
         </v-container>
