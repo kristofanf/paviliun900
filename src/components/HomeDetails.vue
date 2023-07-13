@@ -25,38 +25,37 @@
         <v-card
         class="mx-auto"
         max-width="auto"
+        flat="true"
     >
-        <v-container fluid style="background-color: #fff">
-            <div style="width:100%; margin: 2rem; "><h2 class="text-center justify-center" style="font-weight: 500;font-size: 2rem;">UNITS FOR RENT</h2></div>
-            <airbnb-card></airbnb-card>
-        </v-container>
-        <v-container>
-            <maps-card></maps-card>
-        </v-container>
-       
-        <v-container>
-            <review-card></review-card>
-        </v-container>
-    </v-card>
+            <v-container fluid style="background-color: #fff">
+                <div style="width:100%; margin: 2rem; "><h2 class="text-center justify-center" style="font-weight: 500;font-size: 2rem;">UNITS FOR RENT</h2></div>
+                <airbnb-card></airbnb-card>
+            </v-container>
+            <v-container>
+                <maps-card></maps-card>
+            </v-container>
+            <v-container>
+                <review-card></review-card>
+            </v-container>
+        </v-card>
     </div>
- 
-      
-        
- 
+    <div class="appear">
+
+    </div>
 </template>
 
 <script>
 /* eslint-disable */
 import AirbnbCard from './AirbnbCard.vue';
-import Unitb21Card from './UnitB21Card.vue';
 import MapsCard from './MapsCard.vue'
 import ReviewCard from './ReviewCard.vue';
+
 export default {
     
     name: 'HomeDetails',
     components:{
         AirbnbCard,
-        Unitb21Card,
+      
         MapsCard,
         ReviewCard
     },
