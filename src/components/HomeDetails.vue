@@ -4,7 +4,7 @@
         <v-row style="margin-top: 10%;margin-bottom: 10%;">
             <v-col cols="12" md="6" lg="6" xl="6">
                 <v-img
-                    src="../assets/lahan.jpg"
+                    src="../assets/lorong.jpg"
                     height="500"
                     width="100%"
                     :aspect-ratio="1"
@@ -25,7 +25,7 @@
         <v-card
         class="mx-auto"
         max-width="auto"
-        flat="true"
+        flat
     >
             <v-container fluid style="background-color: #fff">
                 <div style="width:100%; margin: 2rem; "><h2 class="text-center justify-center" style="font-weight: 500;font-size: 2rem;">UNITS FOR RENT</h2></div>
@@ -94,7 +94,7 @@ export default {
   opacity: 1;
 }
 .lahan{
-    transition: all .2s ease-in-out; 
+    transition: all .5s ease-in-out; 
 }
 .lahan:hover{
     transform: scale(1.1);

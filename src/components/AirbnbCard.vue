@@ -1,6 +1,6 @@
 <template>
-    <v-row justify="center">
-        <v-col cols="12" lg="4" md="4" xl="4" v-for="(unit, i) in deskripsi" :key="i" style="margin: 0 1rem;">
+    <v-row justify="center" style="margin-bottom: 1rem;">
+        <v-col class="unit-card" cols="12" lg="4" md="4" xl="4" v-for="(unit, i) in deskripsi" :key="i" style="margin: 0 1rem;" @click="sendData(deskripsi[i])">
         
             <v-flex xs6>
                 <v-carousel
@@ -22,98 +22,53 @@
                             >
                                 <v-layout fill-heigt pb-4 mb-4>
                                 <v-flex xs12>
-                                    <v-card color="white" class="pa-2">
-                                    <span class="black--text text-body-1">{{deskripsi[i].tag}}</span>
+                                    <v-card :color="deskripsi[i].tag == 'Available' ? 'white': '#777b7e'" class="pa-2">
+                                        <span class="black--text text-body-1">{{deskripsi[i].tag}}</span>
                                     </v-card>
+                                    
                                 </v-flex>
                                 </v-layout>
                     </v-container>
                     </v-carousel-item>
                 </v-carousel>
                 <br>
-                <p style="font-weight:700;" v-html="deskripsi[i].fitur"></p>
-                <br>
-                <h2 style="font-weight:500;">{{deskripsi[i].judul}}</h2>
-                <hr style="width: 50%; font-weight: 600;">
-                <br>
-                <p class="deskripsi" style="">{{deskripsi[i].desc}}</p>
-                <br>
-                <h3 style="color:#5c5c5c; margin-bottom: 3rem;">{{deskripsi[i].harga}}</h3>
+                
+                    <p style="font-weight:700;" v-html="deskripsi[i].fitur"></p>
+                    <br>
+                    <h2 style="font-weight:500;">{{deskripsi[i].judul}}</h2>
+                    <hr style="width: 50%; font-weight: 600;">
+                    <br>
+                    <div class="isi" style="display:block; oaverflow:auto;">
+                        <p class="deskripsi" style="">{{deskripsi[i].desc}}</p>
+                        <br>
+                        <span><h3 class="" style="color:#5c5c5c; ">{{deskripsi[i].harga}}</h3></span>
+                    </div>
             </v-flex>
         </v-col>
     </v-row>
-    
-        
-        <!-- <v-card-actions class="justify-center">
-            <v-row>
-                <v-col>
-                    <h2 class="text-h5">Spacious and Comfortable Airbnb</h2>
-                </v-col>
-                <v-col>
-                     <div class="d-flex justify-center">
-                       
-                        <div class="d-flex" v-for="(item,i) in fasilitas" :key="i">
-                            <Icon :style="{ fontSize: '24px', }" :icon="item.icon" />
-                            <p class="font-weight-medium" style="font-family: roboto; font-size: 1.2rem;">&nbsp;{{item.jumlah}}</p>
-                            &emsp;
-                        </div>
-                        
-                    </div>
-                </v-col>
-            </v-row>
-        </v-card-actions> -->
-        <!-- <v-card-actions>
-            <v-row class="hidden-sm-and-down">
-                <v-col>
-                    <v-btn class="button-order-airbnb" block href="https://www.airbnb.com/rooms/41101697" target="_blank">
-                        <Icon :style="{ fontSize: '25px' }" icon="mingcute:airbnb-line" />
-                        <p class="text-body-1">Order via Airbnb</p>
-                    </v-btn>
-                </v-col>
-                
-                <v-col>
-                    <v-btn class="button-order-wa" block>
-                        <Icon :style="{ fontSize: '25px' }" icon="basil:whatsapp-outline" />
-                        <p class="text-body-1">Order via Whatsapp</p>
-                    </v-btn>
-                </v-col>
-            </v-row>
-            <v-row class="hidden-md-and-up">
-                <v-col>
-                    <v-btn class="button-order-airbnb-mobile" block href="https://www.airbnb.com/rooms/41101697" target="_blank">
-                        <Icon :style="{ fontSize: '25px' }" icon="mingcute:airbnb-line" />
-                        <p class="text-body-1">Order via Airbnb</p>
-                    </v-btn>
-                </v-col>
-                
-                <v-col>
-                    <v-btn class="button-order-wa-mobile" block>
-                        <Icon :style="{ fontSize: '25px' }" icon="basil:whatsapp-outline" />
-                        <p class="text-body-1">Order via Whatsapp</p>
-                    </v-btn>
-                </v-col>
-            </v-row>
-        
-        </v-card-actions> -->
-       
 </template>
 
 <script>
 //import { Icon } from '@iconify/vue';
+//import router from '../router/index.js'
 export default {
     name: 'AirbnbCard',
     components:{
        
     },
+    created(){
+        this.sortedArray();
+    },
     data(){
         return{
             deskripsi:[
                 {
+                    id: 1,
                     judul: 'Spacious and Comfortable Airbnb',
                     fitur: '4 bedrooms &emsp; 8 guests &emsp; 2 bathrooms &emsp; free Wi-Fi',
                     desc: 'Paviliun 900 airbnb location is in the center of Jogja so there are many places you can visit. Paviliun 900 airbnb has 4 bedrooms, 2 bathrooms, kitchen, and one big livingroom for you to enjoy your time with your family',
                     harga: 'Rp.950.000/night',
-                    tag:'Superhost',
+                    tag:'Available',
                     gambar:[
                         {
                             src: 'airbnbTengah'
@@ -130,11 +85,12 @@ export default {
                     ]
                 },
                 {
+                    id: 2,
                     judul: 'Exclusive and Strategic Apartment',
                     fitur: '3 bedrooms &emsp; 6 guests &emsp; 2 bathrooms',
-                    desc: 'Paviliun 900 airbnb has 4 bedrooms, 2 bathrooms, kitchen, and one big livingroom for you to enjoy your time with your family',
+                    desc: 'Exclusive 3 bedrooms unit apartment in the center of Jogja that fully furnished. This unit is for you that need a place for long term stay in Jogja and live comfortably',
                     harga: 'Rp.50.000.000/year',
-                    tag: 'Rare to Find',
+                    tag: 'Available',
                     gambar:[
                         {
                             src: 'b21-LivingRoom'
@@ -153,54 +109,54 @@ export default {
                         },
                     ]
                 },
-                {
-                    judul: 'Exclusive and Strategic Apartment',
-                    fitur: '3 bedrooms &emsp; 6 guests &emsp; 2 bathrooms',
-                    desc: 'Paviliun 900 airbnb has 4 bedrooms, 2 bathrooms, kitchen, and one big livingroom for you to enjoy your time with your famil',
-                    harga: 'Rp.50.000.000/year',
-                    tag: 'Rare to Find',
-                    gambar:[
-                        {
-                            src: 'b21-LivingRoom'
-                        },
-                        {
-                            src: 'b21-dapur'
-                        },
-                        {
-                            src: 'b21-masterBed'
-                        },
-                        {
-                            src: 'b21-KMM'
-                        },
-                        {
-                            src: 'b21-Koridor'
-                        },
-                    ]
-                },
-                {
-                    judul: 'Exclusive and Strategic Apartment',
-                    fitur: '3 bedrooms &emsp; 6 guests &emsp; 2 bathrooms',
-                    desc: 'Paviliun 900 airbnb has 4 bedrooms, 2 bathrooms, kitchen, and one big livingroom for you to enjoy your time with your famil',
-                    harga: 'Rp.50.000.000/year',
-                    tag: 'Rare to Find',
-                    gambar:[
-                        {
-                            src: 'b21-LivingRoom'
-                        },
-                        {
-                            src: 'b21-dapur'
-                        },
-                        {
-                            src: 'b21-masterBed'
-                        },
-                        {
-                            src: 'b21-KMM'
-                        },
-                        {
-                            src: 'b21-Koridor'
-                        },
-                    ]
-                },
+                // {
+                //     judul: 'Low Cost Exclusive Airbnb',
+                //     fitur: '2 bedrooms &emsp; 4 guests &emsp; 2 bathrooms',
+                //     desc: '2 bedrooms airbnb with competitive price. A simple yet fully furnished airbnb for your staycation and it is in the center of Yogyakarta city',
+                //     harga: 'Rp.550.000/night',
+                //     tag: 'Not Available',
+                //     gambar:[
+                //         {
+                //             src: 'b21-LivingRoom'
+                //         },
+                //         {
+                //             src: 'b21-dapur'
+                //         },
+                //         {
+                //             src: 'b21-masterBed'
+                //         },
+                //         {
+                //             src: 'b21-KMM'
+                //         },
+                //         {
+                //             src: 'b21-Koridor'
+                //         },
+                //     ]
+                // },
+                // {
+                //     judul: 'Minimalist and Compact Apartment',
+                //     fitur: '2 bedrooms &emsp; 3 guests &emsp; 2 bathrooms',
+                //     desc: 'This unit has 2 bedrooms, 2 bathrooms, kitchen set, and livingroom. This unit is fully furnished and it is suitable for you that looking for a nice and compact apartment unit with reasonable price',
+                //     harga: 'Rp.40.000.000/year',
+                //     tag: 'Not Available',
+                //     gambar:[
+                //         {
+                //             src: 'b21-LivingRoom'
+                //         },
+                //         {
+                //             src: 'b21-dapur'
+                //         },
+                //         {
+                //             src: 'b21-masterBed'
+                //         },
+                //         {
+                //             src: 'b21-KMM'
+                //         },
+                //         {
+                //             src: 'b21-Koridor'
+                //         },
+                //     ]
+                // },
                
                 
                 
@@ -237,11 +193,35 @@ export default {
                     icon: 'material-symbols:wifi',
                     jumlah: '100Mbps'
                 }
-            ]
+            ],
+            item: []
         }
     },
     methods:{
-        
+        sortedArray(){
+            this.deskripsi.sort((a,b)=>{
+                const tagA = a.tag.toUpperCase()
+                const tagB = b.tag.toUpperCase()
+                if(tagA< tagB){
+                    return -1;
+                }
+                if(tagA > tagB){
+                    return 1;
+                }
+                return 0
+            })
+            console.log(this.deskripsi);
+        },
+        sendData(item){
+            this.item = item
+          
+            console.log(this.item);
+            sessionStorage.setItem("unit",JSON.stringify(this.item))
+            this.$router.push({
+                name: 'detail',
+            })
+            console.log(this.item);
+        }
     }
 }
 </script>
@@ -279,21 +259,39 @@ export default {
  .button-order-wa-mobile{
     background-color: #25D366;
     color: white;
+ }
+ .isi span{
+   
+    position: absolute;
+   
+   
  } 
- .deskripsi{
+ .isi{
+     margin-bottom: 3rem;
+ }
+ .unit-card{
+    transition: ease-out 0.5s;
+ }
+ .unit-card:hover{
+   
+    cursor: pointer;
+    transform: scale(1.1);
+    box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px
+ }
+ /* .deskripsi{
     height: 80px;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 3; /* number of lines to show */  
+    -webkit-line-clamp: 3; 
     -webkit-box-orient: vertical;
- }
- @media only screen and (max-width:960px)  {
+ } */
+ /* @media only screen and (max-width:960px)  {
     .deskripsi{
         height: 70px;
         overflow: hidden;
         display: -webkit-box;
-        -webkit-line-clamp: 3; /* number of lines to show */  
+        -webkit-line-clamp: 3; 
         -webkit-box-orient: vertical;
     }
- }
+ } */
 </style>

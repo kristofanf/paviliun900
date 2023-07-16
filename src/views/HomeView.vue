@@ -20,5 +20,8 @@ export default defineComponent({
     HomeHero,
     HomeDetails
   },
+  created(){
+    sessionStorage.clear()
+  }
 });
 </script>

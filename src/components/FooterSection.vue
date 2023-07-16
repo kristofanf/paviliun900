@@ -33,7 +33,7 @@ export default {
                 {
                     icon:'mdi-light:email',
                     keterangan: 'paviliun900@gmail.com',
-                    link:'www.gmail.com'
+                    link:'mailto:paviliun900@gmail.com?subject=Informasi Paviliun900'
                 },
                 {
                     icon: 'fa-brands:airbnb',
