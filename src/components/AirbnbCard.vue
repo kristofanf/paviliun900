@@ -1,6 +1,6 @@
 <template>
     <v-row justify="center" style="margin-bottom: 1rem;">
-        <v-col class="unit-card" cols="12" lg="4" md="4" xl="4" v-for="(unit, i) in deskripsi" :key="i" style="margin: 0 1rem;" @click="sendData(deskripsi[i])">
+        <v-col class="unit-card" cols="12" lg="4" md="4" xl="4" v-for="(unit, i) in deskripsi" :key="i" style="margin: 0 1rem;" >
         
             <v-flex xs6>
                 <v-carousel
@@ -32,7 +32,7 @@
                     </v-carousel-item>
                 </v-carousel>
                 <br>
-                
+                <div @click="sendData(deskripsi[i])">
                     <p style="font-weight:700;" v-html="deskripsi[i].fitur"></p>
                     <br>
                     <h2 style="font-weight:500;">{{deskripsi[i].judul}}</h2>
@@ -43,6 +43,7 @@
                         <br>
                         <span><h3 class="" style="color:#5c5c5c; ">{{deskripsi[i].harga}}</h3></span>
                     </div>
+                </div>
             </v-flex>
         </v-col>
     </v-row>
@@ -68,7 +69,9 @@ export default {
                     fitur: '4 bedrooms &emsp; 8 guests &emsp; 2 bathrooms &emsp; free Wi-Fi',
                     desc: 'Paviliun 900 airbnb location is in the center of Jogja so there are many places you can visit. Paviliun 900 airbnb has 4 bedrooms, 2 bathrooms, kitchen, and one big livingroom for you to enjoy your time with your family',
                     harga: 'Rp.950.000/night',
+                    tamu: '8',
                     tag:'Available',
+                    detail: 'Our Airbnb located in quiet and green area near UGM and UNY campuses. The master bedroom is very spacious with ensuite bathroom. The other 3 bedrooms can accommodate up to 6 people with comfort. Bedrooms are well lit and provided with working desk to support WFH. The living and dining areas are spacious, cozy, suitable for small gatherings. The kitchen provides a gas stove, microwave, and a big refrigerator.',
                     gambar:[
                         {
                             src: 'airbnbTengah'
@@ -82,6 +85,84 @@ export default {
                         {
                             src: 'tengah'
                         },
+                        
+                    ],
+                    fasilitas:[
+                        {
+                            nama: '4 Bedrooms',
+                            ikon: 'mdi:bed-outline'
+                        },
+                        {
+                            nama: '2 Bathrooms',
+                            ikon: 'teenyicons:bath-outline'
+                        },
+                        {
+                            nama: 'Smart TV 55"',
+                            ikon: 'pixelarticons:device-tv-smart'
+                        },
+                        {
+                            nama: 'Kitchen',
+                            ikon: 'fa6-solid:kitchen-set'
+                        },
+                        {
+                            nama: 'Wifi',
+                            ikon: 'iconoir:wifi'
+                        },
+                        {
+                            nama: 'Air Conditioning',
+                            ikon: 'tabler:air-conditioning'
+                        },
+                        {
+                            nama: 'Free Washer',
+                            ikon: 'fluent:washer-24-regular'
+                        },
+                        {
+                            nama: 'Free Parking (2 Cars)',
+                            ikon: 'ph:car'
+                        },
+                        {
+                            nama: 'Water Heater',
+                            ikon: 'material-symbols:water-heater-outline'
+                        },
+                        {
+                            nama: 'Refrigerator',
+                            ikon: 'ep:refrigerator'
+                        },
+                        {
+                            nama: 'Microwave',
+                            ikon: 'material-symbols:microwave-outline'
+                        },
+                    ],
+                    rules: [
+                        {
+                            aturan: 'No Smoking',
+                            ikon: 'mdi:no-smoking'
+                        },
+                        {
+                            aturan: 'Check-in: 2:00 PM - 7:00PM',
+                            ikon: 'icon-park-outline:check-in'
+                        },
+                        {
+                            aturan: 'Checkout before 12:00PM',
+                            ikon: 'ri:time-line'
+                        },
+                        {
+                            aturan: '8 guests maximum ',
+                            ikon: 'fluent:people-20-regular'
+                        },
+                        
+                    ],
+                    order:[
+                        {
+                            detail: '+62 812 7085 3749',
+                            link: 'https://wa.me/6281270853749?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900',
+                            ikon: 'la:whatsapp'
+                        },
+                        {
+                            detail: 'Airbnb',
+                            link: 'https://www.airbnb.com/rooms/41101697',
+                            ikon: 'fa-brands:airbnb'
+                        },
                     ]
                 },
                 {
@@ -90,7 +171,7 @@ export default {
                     fitur: '3 bedrooms &emsp; 6 guests &emsp; 2 bathrooms',
                     desc: 'Exclusive 3 bedrooms unit apartment in the center of Jogja that fully furnished. This unit is for you that need a place for long term stay in Jogja and live comfortably',
                     harga: 'Rp.50.000.000/year',
-                    tag: 'Available',
+                    tag: 'Not Available',
                     gambar:[
                         {
                             src: 'b21-LivingRoom'
@@ -107,7 +188,8 @@ export default {
                         {
                             src: 'b21-Koridor'
                         },
-                    ]
+                    ],
+                    
                 },
                 // {
                 //     judul: 'Low Cost Exclusive Airbnb',
