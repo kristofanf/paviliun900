@@ -2,32 +2,29 @@
     <v-row justify="center" style="margin-bottom: 1rem;">
         <v-col class="unit-card" cols="12" lg="4" md="4" xl="4" v-for="(unit, i) in deskripsi" :key="i" style="margin: 0 1rem;" >
         
-            <v-flex xs6>
+            <v-col >
                 <v-carousel
                     hide-delimiter-background
                     cycle
                     show-arrows="hover"
                 >
                     <v-carousel-item
-                    v-for="(item,k) in deskripsi[i].gambar"
+                    v-for="(item,k) in deskripsi[i].gambar.slice(0,5)"
                     :key="k"
                     :src="require(`../assets/airbnb/${item.src}.jpg`)"
                     cover
                     >
                     <v-container
-                                fill-height
-                                fluid
-                                pa-0 ma-0 pb-3 
+                        fill-height
+                        fluid
+                        pa-0 ma-0 pb-3 
                                 
-                            >
-                                <v-layout fill-heigt pb-4 mb-4>
-                                <v-flex xs12>
-                                    <v-card :color="deskripsi[i].tag == 'Available' ? 'white': '#777b7e'" class="pa-2">
-                                        <span class="black--text text-body-1">{{deskripsi[i].tag}}</span>
-                                    </v-card>
-                                    
-                                </v-flex>
-                                </v-layout>
+                    >
+                        <v-layout fill-heigt pb-4 mb-4>
+                                <v-card :color="deskripsi[i].tag == 'Available' ? 'white': '#777b7e'" class="pa-2">
+                                    <span class="black--text text-body-1">{{deskripsi[i].tag}}</span>
+                                </v-card>
+                        </v-layout>
                     </v-container>
                     </v-carousel-item>
                 </v-carousel>
@@ -44,7 +41,7 @@
                         <span><h3 class="" style="color:#5c5c5c; ">{{deskripsi[i].harga}}</h3></span>
                     </div>
                 </div>
-            </v-flex>
+            </v-col>
         </v-col>
     </v-row>
 </template>
@@ -80,10 +77,31 @@ export default {
                             src: 'dapur'
                         },
                         {
-                            src: 'masterbr'
+                            src: 'master'
                         },
                         {
                             src: 'tengah'
+                        },
+                        {
+                            src: 'master2'
+                        },
+                        {
+                            src: 'hall'
+                        },
+                        {
+                            src: 'kamar2'
+                        },
+                        {
+                            src: 'kamar3'
+                        },
+                        {
+                            src: 'kamar4'
+                        },
+                        {
+                            src: 'km1'
+                        },
+                         {
+                            src: 'dapur1'
                         },
                         
                     ],
@@ -154,7 +172,7 @@ export default {
                     ],
                     order:[
                         {
-                            detail: '+62 812 7085 3749',
+                            detail: 'Whatsapp',
                             link: 'https://wa.me/6281270853749?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900',
                             ikon: 'la:whatsapp'
                         },
@@ -292,17 +310,15 @@ export default {
                 }
                 return 0
             })
-            console.log(this.deskripsi);
+            
         },
         sendData(item){
             this.item = item
-          
-            console.log(this.item);
             sessionStorage.setItem("unit",JSON.stringify(this.item))
             this.$router.push({
                 name: 'detail',
             })
-            console.log(this.item);
+            
         }
     }
 }

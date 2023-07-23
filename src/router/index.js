@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import AirbnbDetail from '../components/AirbnbDetail.vue'
-
+import ImageGallery from '../components/ImageGallery.vue'
 const routes = [
   {
     path: '/',
@@ -22,12 +22,21 @@ const routes = [
     name:'detail',
     component:AirbnbDetail,
     props: true
+  },
+  {
+    path:'/image',
+    name:'image',
+    component:ImageGallery,
+    props: true
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
-  routes
+  routes,
+  scrollBehavior() {
+    document.getElementById('app').scrollIntoView({ behavior: 'smooth' });
+}
 })
 
 export default router

@@ -1,10 +1,10 @@
 <template>
     <v-app>
-        <v-content transition="slide-x-transition" style="background-color: #F5F5F5">
+        <v-main transition="slide-x-transition" style="background-color: #F5F5F5">
             <router-view></router-view>
             <float-button></float-button>
             <footer-section></footer-section>
-        </v-content>
+        </v-main>
     </v-app>
 </template>
 

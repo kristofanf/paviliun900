@@ -8,9 +8,11 @@
     </v-row>
     <v-row>
         <v-col cols="12" lg="4" md="4" xl="4" v-for="(kontak, i) in kontaks" :key="i">
-            <v-button class="button-kontak">
-                <a :href="kontak.link" target="_blank"><h5 class="text-center icons"><Icon :icon="kontak.icon" :inline="true" width="25" height="20" :style="{ fontSize: '20px' }"/>{{kontak.keterangan}}</h5></a> 
-            </v-button>
+                <a :href="kontak.link" target="_blank">
+                    <h5 class="text-center icons"><Icon :icon="kontak.icon" :inline="true" width="25" height="20" :style="{ fontSize: '20px' }"/>
+                        {{kontak.keterangan}}
+                    </h5>
+                </a> 
         </v-col>
     </v-row>
 </template>
