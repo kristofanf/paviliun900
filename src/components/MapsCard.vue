@@ -31,11 +31,14 @@ export default {
                     isi: '5 minuetes driving to RS Bethesda'
                 },
                 {
-                    isi: '7 minuetes driving to Universitas Sanata Dharma Mrican'
+                    isi: '5 minuetes driving to RS Panti Rapih'
                 },
                 {
-                    isi: '8 minuetes driving to SMA Bopkri 1'
+                    isi: '7 minuetes driving to Universitas Sanata Dharma Mrican'
                 },
+                // {
+                //     isi: '8 minuetes driving to SMA Bopkri 1'
+                // },
                 {
                     isi: '650m to Universitas Negeri Yogyakarta'
                 },
