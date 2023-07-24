@@ -71,6 +71,16 @@
 <script>
 export default {
     name: 'ImageGallery',
+    beforeCreate(){
+        this.detailUnit = JSON.parse( sessionStorage.getItem('unit'))
+        if(this.detailUnit == null){
+            this.$router.replace({
+                name: 'home',
+               
+            }).then(()=>{this.$router.go()})
+
+        }
+    },
     created() {
         this.detailUnit = JSON.parse( sessionStorage.getItem('unit'))
     },

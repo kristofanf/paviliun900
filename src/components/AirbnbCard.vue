@@ -207,6 +207,76 @@ export default {
                             src: 'b21-Koridor'
                         },
                     ],
+                    fasilitas:[
+                        {
+                            nama: '3 Bedrooms',
+                            ikon: 'mdi:bed-outline'
+                        },
+                        {
+                            nama: '2 Bathrooms',
+                            ikon: 'teenyicons:bath-outline'
+                        },
+                        {
+                            nama: 'Smart TV 32"',
+                            ikon: 'pixelarticons:device-tv-smart'
+                        },
+                        {
+                            nama: 'Kitchen',
+                            ikon: 'fa6-solid:kitchen-set'
+                        },
+                        {
+                            nama: 'Wifi**',
+                            ikon: 'iconoir:wifi'
+                        },
+                        {
+                            nama: 'Air Conditioning',
+                            ikon: 'tabler:air-conditioning'
+                        },
+                        {
+                            nama: 'Washer',
+                            ikon: 'fluent:washer-24-regular'
+                        },
+                        {
+                            nama: 'Free Parking (1 Cars)',
+                            ikon: 'ph:car'
+                        },
+                        {
+                            nama: 'Water Heater',
+                            ikon: 'material-symbols:water-heater-outline'
+                        },
+                        {
+                            nama: 'Refrigerator',
+                            ikon: 'ep:refrigerator'
+                        },
+                        {
+                            nama: 'Microwave',
+                            ikon: 'material-symbols:microwave-outline'
+                        },
+                    ],
+                    rules: [
+                        {
+                            aturan: 'No Smoking',
+                            ikon: 'mdi:no-smoking'
+                        },
+                       
+                        {
+                            aturan: '6 guests maximum ',
+                            ikon: 'fluent:people-20-regular'
+                        },
+                        
+                    ],
+                    order:[
+                        {
+                            detail: 'Whatsapp',
+                            link: 'https://wa.me/6281270853749?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900',
+                            ikon: 'la:whatsapp'
+                        },
+                        // {
+                        //     detail: 'Airbnb',
+                        //     link: 'https://www.airbnb.com/rooms/41101697',
+                        //     ikon: 'fa-brands:airbnb'
+                        // },
+                    ]
                     
                 },
                 // {
