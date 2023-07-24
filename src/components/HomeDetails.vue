@@ -1,6 +1,6 @@
 
 <template>
-    <div class="appear">
+    <div :class="{appear: !isMobile}">
         <v-row style="margin-top: 10%;margin-bottom: 10%;">
             <v-col cols="12" md="6" lg="6" xl="6">
                 <v-img
@@ -59,9 +59,23 @@ export default {
         MapsCard,
         ReviewCard
     },
+    data(){
+        return{
+            isMobile : false,
+        }
+    },
     created(){
         window.addEventListener("scroll", this.reveal);
         this.reveal()
+    },
+    beforeMount () {
+      if (typeof window === 'undefined') return
+
+      window.removeEventListener('resize', this.onResize, { passive: true })
+    },
+    mounted () {
+      this.onResize()
+      window.addEventListener('resize', this.onResize, { passive: true })
     },
     methods: {
         reveal(){
@@ -76,7 +90,10 @@ export default {
             reveals[i].classList.remove("active");
             }
             }
-        }
+        },
+        onResize () {
+            this.isMobile = window.innerWidth < 600
+        },
     },
 }
 

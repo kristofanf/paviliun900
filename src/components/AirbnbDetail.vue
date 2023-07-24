@@ -4,7 +4,7 @@
             <v-col cols="12" lg="8" md="8" xl="8">
                 <div >
                     <v-container fluid>
-                        <v-btn @click="this.$router.replace({name: 'home'})" class="ma-2" elevation="1" color="black">
+                        <v-btn @click="this.$router.replace({name: 'home'})" elevation="1" color="black">
                             <v-icon
                             start
                             icon="mdi-arrow-left"

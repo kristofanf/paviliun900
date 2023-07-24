@@ -1,70 +1,68 @@
 <template>
     <v-row justify="center" align="center" style="background-color:white;">
         <v-col cols="12" lg="8" md="8" xl="8">
-            <v-row class="mt-3">
-                
-                    <v-btn @click="this.$router.replace({name: 'detail'})" class="ma-2" elevation="1" color="black">
-                        <v-icon
-                        start
-                        icon="mdi-arrow-left"
-                        ></v-icon>
+            <v-container>
+                <v-btn @click="this.$router.replace({name: 'detail'})" class="mb-3" elevation="1" color="black">
+                    <v-icon
+                    start
+                    icon="mdi-arrow-left"
+                    ></v-icon>
                         back
-                    </v-btn>
-                
-            </v-row>
-
-            <v-row>
-                <v-col
-                    v-for="(item,k) in detailUnit.gambar" :key="k"
-                
-                    class="d-flex child-flex"
-                    cols="12"
-                    sm="4"
-                    lg="4"
-                    ms="4"
-                    xl="4"
-                >
-                    <v-img
-                        :src="require(`../assets/airbnb/${item.src}.jpg`)"
-                        :lazy-src="require(`../assets/airbnb/${item.src}.jpg`)"
-                        aspect-ratio="1"
-                        cover
-                        class="bg-grey-lighten-2 gallery"
-                        @click="showImage(item.src)"
-                        
+                </v-btn>
+                <v-row>
+                    <v-col
+                        v-for="(item,k) in detailUnit.gambar" :key="k"
+                    
+                        class="d-flex child-flex"
+                        cols="12"
+                        sm="4"
+                        lg="4"
+                        ms="4"
+                        xl="4"
                     >
-                     </v-img>
-                    <div v-if="dataImage" class="overlay">
-                        <v-btn @click="dataImage = null" class="ma-5" style="float:right;">close</v-btn>
-                        <v-img 
-                            class="mt-10 mb-5"
-                            :src="dataImage"
-                            height="95vh"
-                            contain
-                            dark
+                        <v-img
+                            :src="require(`../assets/airbnb/${item.src}.jpg`)"
+                            :lazy-src="require(`../assets/airbnb/${item.src}.jpg`)"
                             aspect-ratio="1"
-                           @click.stop="dataImage = null"
-                        ></v-img>
-                        
-                    </div>
-                        <!-- <template v-slot:placeholder>
-                            <v-row
-                                class="fill-height ma-0"
-                                align="center"
-                                justify="center"
-                            >
-                                <v-progress-circular
-                                indeterminate
-                                color="grey-lighten-5"
-                                ></v-progress-circular>
-                            </v-row>
-                        </template> -->
-                        
-                   
+                            cover
+                            class="bg-grey-lighten-2 gallery"
+                            @click="showImage(item.src)"
+                            
+                        >
+                        </v-img>
+                        <div v-if="dataImage" class="overlay">
+                            <v-btn @click="dataImage = null" class="ma-5" style="float:right;">close</v-btn>
+                            <v-img 
+                                class="mt-10 mb-5"
+                                :src="dataImage"
+                                height="95vh"
+                                contain
+                                dark
+                                aspect-ratio="1"
+                            @click.stop="dataImage = null"
+                            ></v-img>
+                            
+                        </div>
+                            <!-- <template v-slot:placeholder>
+                                <v-row
+                                    class="fill-height ma-0"
+                                    align="center"
+                                    justify="center"
+                                >
+                                    <v-progress-circular
+                                    indeterminate
+                                    color="grey-lighten-5"
+                                    ></v-progress-circular>
+                                </v-row>
+                            </template> -->
+                            
                     
-                    
-                </v-col>
-            </v-row>
+                        
+                        
+                    </v-col>
+                </v-row>
+            </v-container>
+            
         </v-col>
        
     </v-row>
