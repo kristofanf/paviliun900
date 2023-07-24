@@ -22,19 +22,19 @@ export default {
         return{
             list:[
                 {
-                    isi: '5 minuetes driving to Universitas Gajah Mada'
+                    isi: '5 minutes driving to Universitas Gajah Mada'
                 },
                 {
-                    isi: '5 minuetes driving to Universitas Kristen Duta Wacana'
+                    isi: '5 minutes driving to Universitas Kristen Duta Wacana'
                 },
                 {
-                    isi: '5 minuetes driving to RS Bethesda'
+                    isi: '5 minutes driving to RS Bethesda'
                 },
                 {
-                    isi: '5 minuetes driving to RS Panti Rapih'
+                    isi: '5 minutes driving to RS Panti Rapih'
                 },
                 {
-                    isi: '7 minuetes driving to Universitas Sanata Dharma Mrican'
+                    isi: '7 minutes driving to Universitas Sanata Dharma Mrican'
                 },
                 // {
                 //     isi: '8 minuetes driving to SMA Bopkri 1'
@@ -55,7 +55,7 @@ export default {
                     isi: '850m to Galeria Mall'
                 },
                 {
-                    isi: '15 minuetes driving to Pakuwon Mall'
+                    isi: '15 minutes driving to Pakuwon Mall'
                 }
             ]
         }

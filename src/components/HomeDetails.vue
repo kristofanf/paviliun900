@@ -14,7 +14,8 @@
             </v-col>
             <v-col class="d-flex justify-center align-center" cols="12" md="6" lg="6" xl="6">
                 <div>
-                    <h2 style="text-align:center; font-weight:300;">Pavilun 900 is a new living experience with affordable price, modern style of living. and suitable for you who wants to live comfortably on the center of Jogja.</h2>
+                    <h2 v-if="!isMobile" style="text-align:center; font-weight:300;">Pavilun 900 is a new living experience with affordable price, modern style of living. and suitable for you who wants to live comfortably on the center of Jogja.</h2>
+                    <h4 v-if="isMobile" class="ma-5" style="text-align:center; font-weight:300;">Pavilun 900 is a new living experience with affordable price, modern style of living. and suitable for you who wants to live comfortably on the center of Jogja.</h4>
                 </div>
             </v-col>
             <!-- <div style="width:100%; margin: 2rem;"><p class="text-center text-h4">Need a Place to Stay?</p></div> -->
