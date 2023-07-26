@@ -31,7 +31,7 @@
                         >
                         </v-img>
                         <div v-if="dataImage" class="overlay">
-                            <v-btn @click="dataImage = null" class="ma-5" style="float:right;">close</v-btn>
+                            
                             <v-img 
                                 class="mt-10 mb-5"
                                 :src="dataImage"
@@ -40,10 +40,10 @@
                                 dark
                                 aspect-ratio="1"
                             @click.stop="dataImage = null"
-                            ></v-img>
+                            ><v-btn @click="dataImage = null" class="ma-5" style="float:right;">close</v-btn></v-img>
                             
                         </div>
-                            <!-- <template v-slot:placeholder>
+                            <template v-slot:placeholder>
                                 <v-row
                                     class="fill-height ma-0"
                                     align="center"
@@ -54,17 +54,12 @@
                                     color="grey-lighten-5"
                                     ></v-progress-circular>
                                 </v-row>
-                            </template> -->
-                            
-                    
-                        
+                            </template>   
                         
                     </v-col>
                 </v-row>
             </v-container>
-            
         </v-col>
-       
     </v-row>
 </template>
 
@@ -86,17 +81,12 @@ export default {
     },
     data(){
         return {
-            
             dataImage: null
         }
     },
     methods: {
         showImage(data) {
-         
           this.dataImage = require('../assets/airbnb/'+data+'.jpg')
-        
-          console.log(this.dataImage);
-           // Disable scrolling
         },
         hideImage() {
          

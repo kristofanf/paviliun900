@@ -14,7 +14,7 @@
                         <h1 class="text-start">{{detailUnit.judul}} </h1>
                         <h3 style="font-weight: 500;" class="text-start mb-10">{{detailUnit.tamu}} Guests | {{detailUnit.harga}}</h3>
                         <v-row>
-                            <v-col style="height: 40rem;" cols="12" lg="8" md="8" xl="8" v-for="(item,k) in detailUnit.gambar.slice(0,1)" :key="k">
+                            <v-col style="height: 40rem;" cols="12" lg="8" md="6" xl="8" v-for="(item,k) in detailUnit.gambar.slice(0,1)" :key="k">
                                 <v-img
                                     :src="require(`../assets/airbnb/${item.src}.jpg`)"
                                     cover
@@ -110,18 +110,12 @@ export default {
             imageLayout: [
                 { cols: 4 },       
             ],
+            isMobile: false
+       
         }
     },
-    
     created(){
         this.detailUnit = JSON.parse( sessionStorage.getItem('unit'))
-        // if(this.detailUnit == null){
-        //     this.$router.replace({
-        //         name: 'home',
-               
-        //     }).then(()=>{this.$router.go()})
-
-        // }
     },
     beforeCreate(){
         this.detailUnit = JSON.parse( sessionStorage.getItem('unit'))
@@ -132,10 +126,7 @@ export default {
             }).then(()=>{this.$router.go()})
 
         }
-    },
-    
-    
-    
+    },   
 }
 </script>
 
