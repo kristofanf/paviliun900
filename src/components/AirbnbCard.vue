@@ -65,7 +65,7 @@ export default {
                     judul: 'Spacious and Comfortable Airbnb',
                     fitur: '4 bedrooms &emsp; 8 guests &emsp; 2 bathrooms &emsp; free Wi-Fi',
                     desc: 'Paviliun 900 airbnb location is in the center of Jogja so there are many places you can visit. Paviliun 900 airbnb has 4 bedrooms, 2 bathrooms, kitchen, and one big livingroom for you to enjoy your time with your family',
-                    harga: 'Rp.950.000/night',
+                    harga: 'Rp.1.000.000/night',
                     tamu: '8',
                     tag:'Available',
                     detail: 'Our Airbnb located in quiet and green area near UGM and UNY campuses. The master bedroom is very spacious with ensuite bathroom. The other 3 bedrooms can accommodate up to 6 people with comfort. Bedrooms are well lit and provided with working desk to support WFH. The living and dining areas are spacious, cozy, suitable for small gatherings. The kitchen provides a gas stove, microwave, and a big refrigerator.',
@@ -173,7 +173,7 @@ export default {
                     order:[
                         {
                             detail: 'Whatsapp',
-                            link: 'https://wa.me/6281270853749?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900',
+                            link: 'https://wa.me/6285888815722?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900',
                             ikon: 'la:whatsapp'
                         },
                         {
@@ -187,7 +187,9 @@ export default {
                     id: 2,
                     judul: 'Exclusive and Strategic Apartment',
                     fitur: '3 bedrooms &emsp; 6 guests &emsp; 2 bathrooms',
+                    tamu: '6',
                     desc: 'Exclusive 3 bedrooms unit apartment in the center of Jogja that fully furnished. This unit is for you that need a place for long term stay in Jogja and live comfortably',
+                    detail:'This unit is designed with modern and minimalistic style and has 3 bedrooms, 2 bathrooms, kitchen, and livingroom. All of our units is fully furnished and comes with AC for each bedroom and hot water for bathroom. You will live in quiet and exclusive area in the center of Yogyakarta. Paviliun 900 location is near UGM, UNY, UKDW, and Panti Rapih hospital.',
                     harga: 'Rp.50.000.000/year',
                     tag: 'Not Available',
                     gambar:[
@@ -268,7 +270,7 @@ export default {
                     order:[
                         {
                             detail: 'Whatsapp',
-                            link: 'https://wa.me/6281270853749?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900',
+                            link: 'https://wa.me/6285888815722?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900',
                             ikon: 'la:whatsapp'
                         },
                         // {
