@@ -1,0 +1,8 @@
+{
+  "appId": "com.paviliun900",
+  "appName": "paviliun900",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
