@@ -16,7 +16,7 @@ git init
 git add -A
 git commit -m 'deploy'
 
-# if you are deploying to https://<USERNAME>.github.io/<REPO>
+# push to GitHub Pages production branch
 git push -f git@github.com:kristofanf/paviliun900.git master:production
 
 cd -
