@@ -1,0 +1,46 @@
+{
+  "site": {
+    "name": "Paviliun 900",
+    "whatsapp": "6285888815722",
+    "email": "paviliun900@gmail.com",
+    "airbnbUrl": "https://www.airbnb.com/rooms/41101697",
+    "lamudiUrl": "https://www.lamudi.co.id/-agn-34666/"
+  },
+  "hero": {
+    "title": "Welcome to Paviliun 900",
+    "subtitle": "The Unique Paviliun in The Heart of Yogyakarta City",
+    "coverImage": "cover.jpg"
+  },
+  "about": {
+    "text": "Paviliun 900 is a new living experience with affordable price, modern style of living, and suitable for you who wants to live comfortably on the center of Jogja.",
+    "image": "lorong.jpg"
+  },
+  "location": {
+    "address": "Jl.Kepuh GK III No.900, Gondokusuman, Yogyakarta",
+    "mapEmbed": "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3953.0900528287575!2d110.38255821101016!3d-7.780276177163063!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a59a2f2dc8161%3A0x7c1733f14819f16e!2sPaviliun%20900!5e0!3m2!1sen!2sid!4v1688957270598!5m2!1sen!2sid",
+    "nearby": [
+      "5 minutes driving to Universitas Gajah Mada",
+      "5 minutes driving to Universitas Kristen Duta Wacana",
+      "5 minutes driving to RS Bethesda",
+      "5 minutes driving to RS Panti Rapih",
+      "7 minutes driving to Universitas Sanata Dharma Mrican",
+      "650m to Universitas Negeri Yogyakarta",
+      "650m to Empire XXI",
+      "550m to Superindo Supermarket",
+      "700m to Gardena Department Store",
+      "850m to Galeria Mall",
+      "15 minutes driving to Pakuwon Mall"
+    ]
+  },
+  "reviews": [
+    { "text": "\"Comfy place to stay, Fair rate!\"", "author": "Agung Nugroho" },
+    { "text": "\"Mewah, aman, nyaman, tenang..great place to stay\"", "author": "Michel Aaron" },
+    { "text": "\"Tempat tinggal yang nyaman, aman dan lokasi yang strategis\"", "author": "Agus Soelistiono" },
+    { "text": "\"Best airbnb in jogja so far. good location, spacious and clean. very recommended.\"", "author": "Tegar" },
+    { "text": "\"Worth every penny that I paid, the place is very clean, spacy living room and bedrooms.\"", "author": "Yodivan" },
+    { "text": "\"We felt right at home, the place is quiet so we could sleep well. Very clean and comfortable.\"", "author": "Lydia" }
+  ],
+  "footer": {
+    "warning": "Hati-hati penipuan dengan menggunakan foto Paviliun 900. Kontak resmi kami hanya yang tertera pada website Paviliun 900. Kami tidak bertanggung jawab atas akun lain yang mengatasnamakan Paviliun 900."
+  }
+}

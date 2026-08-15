@@ -2,18 +2,22 @@
   <v-parallax
     id="cover"
     height="100vh"
-    :src="coverImg"
-    alt="Paviliun 900 hero image"
+    :src="imgUrl(settings.hero.coverImage)"
+    :alt="settings.hero.title"
   >
     <div class="d-flex flex-column fill-height justify-center align-center text-white">
-      <h1 class="mb-4">Welcome to Paviliun 900</h1>
-      <h4 class="subheading">The Unique Paviliun in The Heart of Yogyakarta City</h4>
+      <h1 class="mb-4">{{ settings.hero.title }}</h1>
+      <h4 class="subheading">{{ settings.hero.subtitle }}</h4>
     </div>
   </v-parallax>
 </template>
 
 <script setup>
-import coverImg from '@/assets/cover.jpg'
+import settings from '@/data/settings.json'
+
+function imgUrl(name) {
+  return `/img/units/${name}`
+}
 </script>
 
 <style scoped>
@@ -31,11 +35,7 @@ h4 {
   font-weight: 200;
 }
 @media only screen and (max-width: 600px) {
-  h1 {
-    font-size: 2rem;
-  }
-  h4 {
-    font-size: 0.8rem;
-  }
+  h1 { font-size: 2rem; }
+  h4 { font-size: 0.8rem; }
 }
 </style>

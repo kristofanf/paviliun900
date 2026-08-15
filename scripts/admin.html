@@ -3,167 +3,276 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Paviliun 900 - Admin CMS</title>
+<title>Paviliun 900 — CMS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,sans-serif;background:#f5f5f5;color:#333}
-.nav{background:#111;color:#fff;padding:1rem 2rem;display:flex;align-items:center;gap:1rem}
-.nav h1{font-size:1.2rem}
-.nav a{color:#aaa;text-decoration:none;font-size:.9rem}
-.nav a:hover{color:#fff}
-.wrap{max-width:960px;margin:2rem auto;padding:0 1rem}
-.card{background:#fff;border-radius:8px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 4px rgba(0,0,0,.1)}
-.card h2{margin-bottom:1rem;font-size:1.1rem}
-label{display:block;margin-bottom:.3rem;font-weight:600;font-size:.85rem}
-input,textarea,select{width:100%;padding:.5rem;border:1px solid #ddd;border-radius:4px;margin-bottom:.8rem;font-size:.9rem}
-textarea{min-height:60px;resize:vertical}
-.btn{padding:.5rem 1.2rem;border:none;border-radius:4px;cursor:pointer;font-size:.9rem;margin-right:.5rem}
-.btn-primary{background:#111;color:#fff}
-.btn-danger{background:#c0392b;color:#fff}
-.btn-sm{padding:.3rem .8rem;font-size:.8rem}
-.tag-avail{background:#27ae60;color:#fff;padding:2px 8px;border-radius:4px;font-size:.75rem}
-.tag-na{background:#7f8c8d;color:#fff;padding:2px 8px;border-radius:4px;font-size:.75rem}
-.unit-item{border-bottom:1px solid #eee;padding:1rem 0;display:flex;justify-content:space-between;align-items:center}
-.unit-item:last-child{border-bottom:none}
+:root{--bg:#fafafa;--card:#fff;--border:#e8e8e8;--text:#1a1a1a;--muted:#888;--accent:#111;--accent-hover:#333;--danger:#dc3545;--success:#28a745;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.06)}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+.topbar{background:var(--accent);color:#fff;padding:0 2rem;height:56px;display:flex;align-items:center;gap:2rem;position:sticky;top:0;z-index:100}
+.topbar h1{font-size:1rem;font-weight:600;letter-spacing:-.02em}
+.topbar nav a{color:rgba(255,255,255,.6);text-decoration:none;font-size:.85rem;font-weight:500;padding:.4rem .8rem;border-radius:6px;transition:.2s}
+.topbar nav a:hover,.topbar nav a.active{color:#fff;background:rgba(255,255,255,.1)}
+.container{max-width:960px;margin:0 auto;padding:2rem 1.5rem}
+.page{display:none}.page.active{display:block}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+.card h2{font-size:1rem;font-weight:600;margin-bottom:1.25rem;letter-spacing:-.01em;display:flex;align-items:center;gap:.5rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:.8rem;font-weight:500;cursor:pointer;transition:.15s;font-family:inherit}
+.btn:hover{background:var(--bg)}.btn:active{transform:scale(.97)}
+.btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-accent:hover{background:var(--accent-hover)}
+.btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}.btn-danger:hover{background:#c82333}
+.btn-sm{padding:.35rem .7rem;font-size:.75rem}
+label{display:block;font-size:.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.35rem}
+input,textarea,select{width:100%;padding:.6rem .8rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;font-family:inherit;transition:.15s;background:var(--bg)}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,0,0,.06)}
+textarea{min-height:80px;resize:vertical}
+.field{margin-bottom:1rem}
+.row{display:flex;gap:1rem}.row>*{flex:1}
+.tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:.7rem;font-weight:600}
+.tag-avail{background:#d4edda;color:#155724}.tag-na{background:#f8d7da;color:#721c24}
+.unit-row{display:flex;justify-content:space-between;align-items:center;padding:.8rem 0;border-bottom:1px solid var(--border)}
+.unit-row:last-child{border-bottom:none}
+.unit-info strong{font-size:.9rem}.unit-info small{color:var(--muted);font-size:.8rem}
+.actions{display:flex;gap:.4rem}
 .img-grid{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0}
-.img-grid img{width:80px;height:80px;object-fit:cover;border-radius:4px;cursor:pointer;border:2px solid transparent}
-.img-grid img.selected{border-color:#111}
-.img-grid img:hover{opacity:.8}
-#form-section{display:none}
-.chip{display:inline-block;background:#eee;padding:2px 8px;border-radius:12px;margin:2px;font-size:.8rem}
-.chip button{background:none;border:none;cursor:pointer;color:#c0392b;font-weight:700}
+.img-grid label{position:relative;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:400}
+.img-grid input{position:absolute;top:4px;left:4px;width:auto;z-index:1}
+.img-grid img{width:72px;height:72px;object-fit:cover;border-radius:8px;border:2px solid transparent;transition:.15s}
+.img-grid input:checked+img{border-color:var(--accent);opacity:1}
+.img-grid img:hover{opacity:.7}
+.chip{display:inline-flex;align-items:center;gap:.3rem;background:var(--bg);border:1px solid var(--border);padding:.25rem .6rem;border-radius:20px;font-size:.78rem;margin:2px}
+.chip button{background:none;border:none;cursor:pointer;color:var(--danger);font-size:.9rem;padding:0 2px}
+.dropzone{border:2px dashed var(--border);border-radius:var(--radius);padding:2rem;text-align:center;color:var(--muted);cursor:pointer;transition:.2s}
+.dropzone:hover,.dropzone.drag{border-color:var(--accent);color:var(--accent);background:rgba(0,0,0,.02)}
+.dropzone input{display:none}
+.section-title{font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:1.5rem 0 .75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+.preview-img{width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border)}
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+.badge{background:var(--accent);color:#fff;padding:1px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
 </style>
 </head>
 <body>
-<div class="nav">
-  <h1>Paviliun 900 CMS</h1>
-  <a href="#" onclick="showList()">Daftar Unit</a>
-  <a href="#" onclick="showForm()">+ Tambah Unit</a>
+<div class="topbar">
+  <h1>Paviliun 900</h1>
+  <nav>
+    <a href="#" data-page="units" class="active">Units</a>
+    <a href="#" data-page="homepage">Homepage</a>
+    <a href="#" data-page="media">Media</a>
+  </nav>
 </div>
-<div class="wrap">
-  <div id="list-section"></div>
-  <div id="form-section"></div>
+<div class="container">
+  <div id="page-units" class="page active"></div>
+  <div id="page-homepage" class="page"></div>
+  <div id="page-media" class="page"></div>
 </div>
 <script>
-const API = '/api'
-let allImages = []
-let units = []
+const API='';
+let units=[], settings={}, images=[];
 
-async function load() {
-  units = await (await fetch(`${API}/units`)).json()
-  allImages = await (await fetch(`${API}/images`)).json()
-  showList()
+async function init(){
+  [units,settings,images]=await Promise.all([
+    fetch(`${API}/api/units`).then(r=>r.json()),
+    fetch(`${API}/api/settings`).then(r=>r.json()),
+    fetch(`${API}/api/images`).then(r=>r.json()),
+  ]);
+  renderUnits();
+  renderHomepage();
+  renderMedia();
 }
 
-function showList() {
-  document.getElementById('form-section').style.display = 'none'
-  const el = document.getElementById('list-section')
-  el.style.display = 'block'
-  let h = '<div class="card"><h2>Daftar Unit</h2>'
-  if (!units.length) h += '<p>Belum ada unit.</p>'
-  units.forEach(u => {
-    const tag = u.tag === 'Available' ? '<span class="tag-avail">Available</span>' : '<span class="tag-na">Not Available</span>'
-    h += `<div class="unit-item">
-      <div><strong>${u.judul}</strong> ${tag}<br><small>${u.harga} | ${u.tamu} tamu | ${(u.gambar||[]).length} foto</small></div>
-      <div><button class="btn btn-primary btn-sm" onclick="editUnit(${u.id})">Edit</button>
-      <button class="btn btn-danger btn-sm" onclick="delUnit(${u.id})">Hapus</button></div></div>`
-  })
-  h += '</div>'
-  el.innerHTML = h
-}
+// NAV
+document.querySelectorAll('[data-page]').forEach(a=>{
+  a.addEventListener('click',e=>{
+    e.preventDefault();
+    document.querySelectorAll('[data-page]').forEach(x=>x.classList.remove('active'));
+    a.classList.add('active');
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+a.dataset.page).classList.add('active');
+  });
+});
 
-function showForm(unit) {
-  document.getElementById('list-section').style.display = 'none'
-  const el = document.getElementById('form-section')
-  el.style.display = 'block'
-  const u = unit || { id:0, judul:'', fitur:'', desc:'', detail:'', harga:'', tamu:'', tag:'Available', gambar:[], fasilitas:[], rules:[], order:[{detail:'Whatsapp',link:'https://wa.me/6285888815722',ikon:'la:whatsapp'}] }
-  const imgChecks = allImages.map(f => `<label style="display:inline-block;margin:2px"><input type="checkbox" value="${f}" ${(u.gambar||[]).includes(f)?'checked':''}> <img src="/img/units/${f}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;vertical-align:middle"></label>`).join('')
-  el.innerHTML = `<div class="card">
-    <h2>${unit ? 'Edit' : 'Tambah'} Unit</h2>
-    <label>Judul</label><input id="f-judul" value="${esc(u.judul)}">
-    <label>Fitur (HTML)</label><input id="f-fitur" value="${esc(u.fitur)}" placeholder="4 bedrooms &amp;emsp; 8 guests">
-    <label>Deskripsi Singkat</label><textarea id="f-desc">${esc(u.desc)}</textarea>
-    <label>Detail</label><textarea id="f-detail">${esc(u.detail)}</textarea>
-    <label>Harga</label><input id="f-harga" value="${esc(u.harga)}" placeholder="Rp.1.000.000/malam">
-    <label>Tamu</label><input id="f-tamu" value="${esc(u.tamu)}" type="number">
-    <label>Status</label><select id="f-tag"><option ${u.tag==='Available'?'selected':''}>Available</option><option ${u.tag==='Not Available'?'selected':''}>Not Available</option></select>
-    <label>Foto Unit (pilih dari yang sudah diupload)</label>
-    <div class="img-grid">${imgChecks || '<p style="color:#999">Belum ada foto. Upload dulu.</p>'}</div>
-    <hr style="margin:1rem 0">
-    <h3>Fasilitas <button class="btn btn-sm" onclick="addFasilitas()">+ Tambah</button></h3>
-    <div id="fasilitas-list">${(u.fasilitas||[]).map((f,i) => `<span class="chip">${f.nama} <button onclick="this.parentElement.remove()">x</button><input type="hidden" data-fn="${f.nama}" data-fi="${f.ikon}"></span>`).join('')}</div>
-    <hr style="margin:1rem 0">
-    <h3>Rules <button class="btn btn-sm" onclick="addRule()">+ Tambah</button></h3>
-    <div id="rules-list">${(u.rules||[]).map(r => `<span class="chip">${r.aturan} <button onclick="this.parentElement.remove()">x</button><input type="hidden" data-rn="${r.aturan}" data-ri="${r.ikon}"></span>`).join('')}</div>
-    <hr style="margin:1rem 0">
-    <div style="margin-top:1rem">
-      <button class="btn btn-primary" onclick="saveUnit(${u.id})">Simpan</button>
-      <button class="btn" onclick="showList()">Batal</button>
+// ── UNITS PAGE ──
+function renderUnits(){
+  const el=document.getElementById('page-units');
+  const sorted=[...units].sort((a,b)=>a.tag.localeCompare(b.tag));
+  let h=`<div class="flex-between" style="margin-bottom:1.25rem"><h2 style="margin:0">Unit Sewa</h2><button class="btn btn-accent" onclick="editUnit()">+ Tambah Unit</button></div><div class="card">`;
+  if(!sorted.length) h+='<p style="color:var(--muted)">Belum ada unit.</p>';
+  sorted.forEach(u=>{
+    const tag=u.tag==='Available'?'<span class="tag tag-avail">Available</span>':'<span class="tag tag-na">Not Available</span>';
+    const img0=(u.gambar||[])[0];
+    h+=`<div class="unit-row">
+      <div style="display:flex;align-items:center;gap:1rem">
+        ${img0?`<img src="/img/units/${img0}" class="preview-img">`:''}
+        <div class="unit-info"><strong>${u.judul}</strong> ${tag}<br><small>${u.harga} · ${u.tamu} tamu · ${(u.gambar||[]).length} foto</small></div>
+      </div>
+      <div class="actions"><button class="btn btn-sm" onclick="editUnit(${u.id})">Edit</button><button class="btn btn-sm btn-danger" onclick="delUnit(${u.id})">Hapus</button></div></div>`;
+  });
+  h+='</div>';
+  el.innerHTML=h;
+}
+function esc(s){return(s||'').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+
+function editUnit(id){
+  const u=id?units.find(x=>x.id===id):{id:0,judul:'',fitur:'',desc:'',detail:'',harga:'',tamu:'',tag:'Available',gambar:[],fasilitas:[],rules:[],order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||'6285888815722'}`,ikon:'la:whatsapp'}]};
+  const imgChecks=images.map(f=>`<label><input type="checkbox" name="imgs" value="${f}" ${(u.gambar||[]).includes(f)?'checked':''}><img src="/img/units/${f}"></label>`).join('');
+  const facs=(u.fasilitas||[]).map((f,i)=>`<span class="chip">${f.nama} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${f.nama}||${f.ikon}"></span>`).join('');
+  const rls=(u.rules||[]).map(r=>`<span class="chip">${r.aturan} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rn data-ri value="${r.aturan}||${r.ikon}"></span>`).join('');
+
+  const el=document.getElementById('page-units');
+  el.innerHTML=`<div class="card">
+    <h2>${id?'Edit':'Tambah'} Unit</h2>
+    <div class="field"><label>Judul</label><input id="fu-judul" value="${esc(u.judul)}"></div>
+    <div class="row"><div class="field"><label>Harga</label><input id="fu-harga" value="${esc(u.harga)}" placeholder="Rp.1.000.000/malam"></div>
+    <div class="field"><label>Tamu</label><input id="fu-tamu" type="number" value="${u.tamu}"></div>
+    <div class="field"><label>Status</label><select id="fu-tag"><option ${u.tag==='Available'?'selected':''}>Available</option><option ${u.tag==='Not Available'?'selected':''}>Not Available</option></select></div></div>
+    <div class="field"><label>Fitur (badge text)</label><input id="fu-fitur" value="${esc(u.fitur)}" placeholder="4 bedrooms &emsp; 8 guests"></div>
+    <div class="field"><label>Deskripsi Singkat</label><textarea id="fu-desc">${esc(u.desc)}</textarea></div>
+    <div class="field"><label>Detail Lengkap</label><textarea id="fu-detail" style="min-height:120px">${esc(u.detail)}</textarea></div>
+    <div class="section-title">Foto Unit</div>
+    <div class="img-grid">${imgChecks||'<p style="color:var(--muted)">Upload foto dulu di tab Media</p>'}</div>
+    <div class="section-title">Fasilitas <button class="btn btn-sm" onclick="addChip('fac')">+ Tambah</button></div>
+    <div id="fac-list">${facs}</div>
+    <div class="section-title">House Rules <button class="btn btn-sm" onclick="addChip('rule')">+ Tambah</button></div>
+    <div id="rule-list">${rls}</div>
+    <div style="margin-top:1.5rem;display:flex;gap:.5rem">
+      <button class="btn btn-accent" onclick="saveUnit(${id})">Simpan</button>
+      <button class="btn" onclick="renderUnits()">Batal</button>
+    </div></div>`;
+}
+function addChip(type){
+  const n=prompt(type==='fac'?'Nama fasilitas:':'Rule:'); if(!n)return;
+  const i=prompt('Icon (iconify name):',type==='fac'?'mdi:bed-outline':'mdi:no-smoking'); if(!i)return;
+  const el=document.getElementById(type==='fac'?'fac-list':'rule-list');
+  el.innerHTML+=`<span class="chip">${n} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-${type==='fac'?'fn':'rn'} data-${type==='fac'?'fi':'ri'} value="${n}||${i}"></span>`;
+}
+async function saveUnit(id){
+  const imgs=[...document.querySelectorAll('input[name=imgs]:checked')].map(c=>c.value);
+  const facs=[...document.querySelectorAll('#fac-list input')].map(h=>{const[n,i]=h.value.split('||');return{nama:n,ikon:i}});
+  const rls=[...document.querySelectorAll('#rule-list input')].map(h=>{const[n,i]=h.value.split('||');return{aturan:n,ikon:i}});
+  const body={judul:v('fu-judul'),fitur:v('fu-fitur'),desc:v('fu-desc'),detail:v('fu-detail'),harga:v('fu-harga'),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||'6285888815722'}?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900`,ikon:'la:whatsapp'}]};
+  if(id){await fetch(`${API}/api/units/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})}
+  else{await fetch(`${API}/api/units`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})}
+  units=await(await fetch(`${API}/api/units`)).json();
+  renderUnits();
+}
+async function delUnit(id){
+  if(!confirm('Hapus unit ini?'))return;
+  await fetch(`${API}/api/units/${id}`,{method:'DELETE'});
+  units=await(await fetch(`${API}/api/units`)).json();
+  renderUnits();
+}
+function v(id){return document.getElementById(id)?.value||''}
+
+// ── HOMEPAGE PAGE ──
+function renderHomepage(){
+  const s=settings, el=document.getElementById('page-homepage');
+  const nearby=(s.location?.nearby||[]).map(t=>`<span class="chip">${t}<button onclick="this.parentElement.remove()">×</button></span>`).join('');
+  const reviews=(s.reviews||[]).map(r=>`<span class="chip">${r.author}: ${r.text.slice(0,30)}…<button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rv value="${esc(r.text)}||${esc(r.author)}"></span>`).join('');
+  const imgOpts=images.map(f=>`<option value="${f}" ${f===s.hero?.coverImage?'selected':''}>${f}</option>`).join('');
+  const imgOpts2=images.map(f=>`<option value="${f}" ${f===s.about?.image?'selected':''}>${f}</option>`).join('');
+  el.innerHTML=`<h2 style="margin-bottom:1.25rem">Pengaturan Homepage</h2>
+    <div class="card"><h2>🌐 Site Info</h2>
+      <div class="row"><div class="field"><label>Nama Situs</label><input id="hs-name" value="${esc(s.site?.name)}"></div>
+      <div class="field"><label>WhatsApp (no kode negara)</label><input id="hs-wa" value="${esc(s.site?.whatsapp)}"></div></div>
+      <div class="row"><div class="field"><label>Email</label><input id="hs-email" value="${esc(s.site?.email)}"></div>
+      <div class="field"><label>Airbnb URL</label><input id="hs-airbnb" value="${esc(s.site?.airbnbUrl)}"></div>
+      <div class="field"><label>Lamudi URL</label><input id="hs-lamudi" value="${esc(s.site?.lamudiUrl)}"></div></div>
     </div>
-  </div>`
+    <div class="card"><h2>🏠 Hero Section</h2>
+      <div class="field"><label>Judul</label><input id="hh-title" value="${esc(s.hero?.title)}"></div>
+      <div class="field"><label>Subtitle</label><input id="hh-sub" value="${esc(s.hero?.subtitle)}"></div>
+      <div class="field"><label>Cover Image</label><select id="hh-img">${imgOpts}</select></div>
+    </div>
+    <div class="card"><h2>📝 About Section</h2>
+      <div class="field"><label>Teks</label><textarea id="ha-text">${esc(s.about?.text)}</textarea></div>
+      <div class="field"><label>Gambar</label><select id="ha-img">${imgOpts2}</select></div>
+    </div>
+    <div class="card"><h2>📍 Lokasi</h2>
+      <div class="field"><label>Alamat</label><input id="hl-addr" value="${esc(s.location?.address)}"></div>
+      <div class="field"><label>Google Maps Embed URL</label><textarea id="hl-map" style="min-height:60px">${esc(s.location?.mapEmbed)}</textarea></div>
+      <div class="section-title">Tempat Terdekat</div>
+      <div id="hl-nearby">${nearby}</div>
+      <button class="btn btn-sm" onclick="addNearby()" style="margin-top:.5rem">+ Tambah</button>
+    </div>
+    <div class="card"><h2>⭐ Reviews</h2>
+      <div id="hr-list">${reviews}</div>
+      <button class="btn btn-sm" onclick="addReview()" style="margin-top:.5rem">+ Tambah Review</button>
+    </div>
+    <div class="card"><h2>📋 Footer</h2>
+      <div class="field"><label>Warning Text</label><textarea id="hf-warn">${esc(s.footer?.warning)}</textarea></div>
+    </div>
+    <button class="btn btn-accent" onclick="saveSettings()">Simpan Semua Pengaturan</button>`;
+}
+function addNearby(){
+  const n=prompt('Tempat terdekat:'); if(!n)return;
+  document.getElementById('hl-nearby').innerHTML+=`<span class="chip">${n}<button onclick="this.parentElement.remove()">×</button></span>`;
+}
+function addReview(){
+  const a=prompt('Nama reviewer:'); if(!a)return;
+  const t=prompt('Isi review:'); if(!t)return;
+  document.getElementById('hr-list').innerHTML+=`<span class="chip">${a}: ${t.slice(0,30)}…<button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rv value="${esc(t)}||${esc(a)}"></span>`;
+}
+async function saveSettings(){
+  const s={
+    site:{name:v('hs-name'),whatsapp:v('hs-wa'),email:v('hs-email'),airbnbUrl:v('hs-airbnb'),lamudiUrl:v('hs-lamudi')},
+    hero:{title:v('hh-title'),subtitle:v('hh-sub'),coverImage:v('hh-img')},
+    about:{text:v('ha-text'),image:v('ha-img')},
+    location:{address:v('hl-addr'),mapEmbed:v('hl-map'),nearby:[...document.querySelectorAll('#hl-nearby .chip')].map(c=>c.childNodes[0].textContent.trim())},
+    reviews:[...document.querySelectorAll('#hr-list input[data-rv]')].map(h=>{const[t,a]=h.value.split('||');return{text:t,author:a}}),
+    footer:{warning:v('hf-warn')}
+  };
+  await fetch(`${API}/api/settings`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)});
+  settings=s;
+  alert('Tersimpan!');
 }
 
-function esc(s) { return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;') }
-
-function addFasilitas() {
-  const n = prompt('Nama fasilitas:'); if(!n) return
-  const i = prompt('Icon (iconify, ex: mdi:bed-outline):', 'mdi:bed-outline'); if(!i) return
-  const el = document.getElementById('fasilitas-list')
-  el.innerHTML += `<span class="chip">${n} <button onclick="this.parentElement.remove()">x</button><input type="hidden" data-fn="${n}" data-fi="${i}"></span>`
+// ── MEDIA PAGE ──
+function renderMedia(){
+  const el=document.getElementById('page-media');
+  const imgs=images.map(f=>`<div style="position:relative;display:inline-block;margin:4px">
+    <img src="/img/units/${f}" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+    <button onclick="delImg('${f}')" style="position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:.7rem;cursor:pointer;line-height:1">×</button>
+    <div style="font-size:.65rem;color:var(--muted);text-align:center;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f}</div></div>`).join('');
+  el.innerHTML=`<h2 style="margin-bottom:1.25rem">Media Library</h2>
+    <div class="card">
+      <div class="dropzone" id="dz">
+        <div style="font-size:2rem;margin-bottom:.5rem">📁</div>
+        <strong>Drag & drop foto di sini</strong><br><small>atau klik untuk pilih file (bisa multi-select)</small>
+        <input type="file" id="file-input" multiple accept="image/*">
+      </div>
+      <div id="upload-status" style="margin-top:.5rem;font-size:.8rem"></div>
+    </div>
+    <div class="card"><h2>Semua Foto (${images.length})</h2>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">${imgs||'<p style="color:var(--muted)">Belum ada foto</p>'}</div>
+    </div>`;
+  const dz=document.getElementById('dz');
+  const fi=document.getElementById('file-input');
+  dz.addEventListener('click',()=>fi.click());
+  dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
+  dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
+  dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('drag');uploadFiles(e.dataTransfer.files)});
+  fi.addEventListener('change',e=>{if(e.target.files.length)uploadFiles(e.target.files)});
 }
-function addRule() {
-  const n = prompt('Rule:'); if(!n) return
-  const i = prompt('Icon:', 'mdi:no-smoking'); if(!i) return
-  const el = document.getElementById('rules-list')
-  el.innerHTML += `<span class="chip">${n} <button onclick="this.parentElement.remove()">x</button><input type="hidden" data-rn="${n}" data-ri="${i}"></span>`
+async function uploadFiles(fileList){
+  const fd=new FormData();
+  for(const f of fileList) fd.append('files',f,f.name);
+  document.getElementById('upload-status').innerHTML='⏳ Mengupload…';
+  const res=await fetch(`${API}/api/upload`,{method:'POST',body:fd});
+  const data=await res.json();
+  images=await(await fetch(`${API}/api/images`)).json();
+  document.getElementById('upload-status').innerHTML=`✅ ${data.files.length} file terupload`;
+  renderMedia();
+  renderUnits();
+}
+async function delImg(name){
+  if(!confirm(`Hapus ${name}?`))return;
+  await fetch(`${API}/api/images/${encodeURIComponent(name)}`,{method:'DELETE'});
+  images=await(await fetch(`${API}/api/images`)).json();
+  renderMedia();
 }
 
-function editUnit(id) { showForm(units.find(u => u.id === id)) }
-
-async function delUnit(id) {
-  if (!confirm('Yakin hapus unit ini?')) return
-  await fetch(`${API}/units/${id}`, { method: 'DELETE' })
-  await load()
-}
-
-async function saveUnit(id) {
-  const gambar = [...document.querySelectorAll('.img-grid input:checked')].map(cb => cb.value)
-  const fasilitas = [...document.querySelectorAll('#fasilitas-list input')].map(h => ({ nama: h.dataset.fn, ikon: h.dataset.fi }))
-  const rules = [...document.querySelectorAll('#rules-list input')].map(h => ({ aturan: h.dataset.rn, ikon: h.dataset.ri }))
-  const body = {
-    judul: document.getElementById('f-judul').value,
-    fitur: document.getElementById('f-fitur').value,
-    desc: document.getElementById('f-desc').value,
-    detail: document.getElementById('f-detail').value,
-    harga: document.getElementById('f-harga').value,
-    tamu: document.getElementById('f-tamu').value,
-    tag: document.getElementById('f-tag').value,
-    gambar, fasilitas, rules,
-    order: [{ detail:'Whatsapp', link:'https://wa.me/6285888815722?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900', ikon:'la:whatsapp' }]
-  }
-  if (id) {
-    await fetch(`${API}/units/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
-  } else {
-    await fetch(`${API}/units`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
-  }
-  await load()
-}
-
-// Image upload
-document.addEventListener('dragover', e => e.preventDefault())
-document.addEventListener('drop', async e => {
-  e.preventDefault()
-  const files = e.dataTransfer.files
-  if (!files.length) return
-  const fd = new FormData()
-  for (const f of files) fd.append('file', f, f.name)
-  const res = await fetch(`${API}/upload`, { method: 'POST', body: fd })
-  const data = await res.json()
-  alert(`Uploaded: ${data.files.join(', ')}`)
-  allImages = await (await fetch(`${API}/images`)).json()
-})
-
-load()
+init();
 </script>
 </body>
 </html>
