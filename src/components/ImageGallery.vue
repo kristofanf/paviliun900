@@ -17,12 +17,12 @@
             lg="4"
           >
             <v-img
-              :src="getImageSrc(item.src)"
-              :lazy-src="getImageSrc(item.src)"
+              :src="imgUrl(item)"
+                            :lazy-src="imgUrl(item)"
               aspect-ratio="1"
               cover
               class="bg-grey-lighten-2 gallery rounded-lg"
-              @click="showImage(item.src)"
+              @click="showImage(item)"
             />
           </v-col>
         </v-row>
@@ -51,18 +51,17 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getAirbnbImage } from '@/utils/images'
 
 const router = useRouter()
 const detailUnit = ref(null)
 const dataImage = ref(null)
 
-function getImageSrc(name) {
-  return getAirbnbImage(name)
+function imgUrl(name) {
+  return `/img/units/${name}`
 }
 
 function showImage(name) {
-  dataImage.value = getAirbnbImage(name)
+  dataImage.value = imgUrl(name)
 }
 
 onMounted(() => {

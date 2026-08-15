@@ -15,7 +15,7 @@
         <v-row>
           <v-col cols="12" lg="8" md="8">
             <v-img
-              :src="getImageSrc(detailUnit.gambar[0].src)"
+              :src="imgUrl(detailUnit.gambar[0])"
               cover
               height="100%"
               min-height="300"
@@ -25,13 +25,13 @@
           <v-col cols="12" lg="4" md="4" class="d-flex" style="flex-direction: column">
             <v-img
               class="mb-1 flex-grow-1 rounded-lg"
-              :src="getImageSrc(detailUnit.gambar[1].src)"
+              :src="imgUrl(detailUnit.gambar[1])"
               height="200"
               cover
             />
             <v-img
               class="flex-grow-1 rounded-lg"
-              :src="getImageSrc(detailUnit.gambar[2].src)"
+              :src="imgUrl(detailUnit.gambar[2])"
               cover
               height="200"
             >
@@ -121,13 +121,12 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
-import { getAirbnbImage } from '@/utils/images'
 
 const router = useRouter()
 const detailUnit = ref(null)
 
-function getImageSrc(name) {
-  return getAirbnbImage(name)
+function imgUrl(name) {
+  return `/img/units/${name}`
 }
 
 function reveal() {

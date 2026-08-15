@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Paviliun 900 - Admin CMS</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,sans-serif;background:#f5f5f5;color:#333}
+.nav{background:#111;color:#fff;padding:1rem 2rem;display:flex;align-items:center;gap:1rem}
+.nav h1{font-size:1.2rem}
+.nav a{color:#aaa;text-decoration:none;font-size:.9rem}
+.nav a:hover{color:#fff}
+.wrap{max-width:960px;margin:2rem auto;padding:0 1rem}
+.card{background:#fff;border-radius:8px;padding:1.5rem;margin-bottom:1.5rem;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.card h2{margin-bottom:1rem;font-size:1.1rem}
+label{display:block;margin-bottom:.3rem;font-weight:600;font-size:.85rem}
+input,textarea,select{width:100%;padding:.5rem;border:1px solid #ddd;border-radius:4px;margin-bottom:.8rem;font-size:.9rem}
+textarea{min-height:60px;resize:vertical}
+.btn{padding:.5rem 1.2rem;border:none;border-radius:4px;cursor:pointer;font-size:.9rem;margin-right:.5rem}
+.btn-primary{background:#111;color:#fff}
+.btn-danger{background:#c0392b;color:#fff}
+.btn-sm{padding:.3rem .8rem;font-size:.8rem}
+.tag-avail{background:#27ae60;color:#fff;padding:2px 8px;border-radius:4px;font-size:.75rem}
+.tag-na{background:#7f8c8d;color:#fff;padding:2px 8px;border-radius:4px;font-size:.75rem}
+.unit-item{border-bottom:1px solid #eee;padding:1rem 0;display:flex;justify-content:space-between;align-items:center}
+.unit-item:last-child{border-bottom:none}
+.img-grid{display:flex;flex-wrap:wrap;gap:.5rem;margin:.5rem 0}
+.img-grid img{width:80px;height:80px;object-fit:cover;border-radius:4px;cursor:pointer;border:2px solid transparent}
+.img-grid img.selected{border-color:#111}
+.img-grid img:hover{opacity:.8}
+#form-section{display:none}
+.chip{display:inline-block;background:#eee;padding:2px 8px;border-radius:12px;margin:2px;font-size:.8rem}
+.chip button{background:none;border:none;cursor:pointer;color:#c0392b;font-weight:700}
+</style>
+</head>
+<body>
+<div class="nav">
+  <h1>Paviliun 900 CMS</h1>
+  <a href="#" onclick="showList()">Daftar Unit</a>
+  <a href="#" onclick="showForm()">+ Tambah Unit</a>
+</div>
+<div class="wrap">
+  <div id="list-section"></div>
+  <div id="form-section"></div>
+</div>
+<script>
+const API = '/api'
+let allImages = []
+let units = []
+
+async function load() {
+  units = await (await fetch(`${API}/units`)).json()
+  allImages = await (await fetch(`${API}/images`)).json()
+  showList()
+}
+
+function showList() {
+  document.getElementById('form-section').style.display = 'none'
+  const el = document.getElementById('list-section')
+  el.style.display = 'block'
+  let h = '<div class="card"><h2>Daftar Unit</h2>'
+  if (!units.length) h += '<p>Belum ada unit.</p>'
+  units.forEach(u => {
+    const tag = u.tag === 'Available' ? '<span class="tag-avail">Available</span>' : '<span class="tag-na">Not Available</span>'
+    h += `<div class="unit-item">
+      <div><strong>${u.judul}</strong> ${tag}<br><small>${u.harga} | ${u.tamu} tamu | ${(u.gambar||[]).length} foto</small></div>
+      <div><button class="btn btn-primary btn-sm" onclick="editUnit(${u.id})">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="delUnit(${u.id})">Hapus</button></div></div>`
+  })
+  h += '</div>'
+  el.innerHTML = h
+}
+
+function showForm(unit) {
+  document.getElementById('list-section').style.display = 'none'
+  const el = document.getElementById('form-section')
+  el.style.display = 'block'
+  const u = unit || { id:0, judul:'', fitur:'', desc:'', detail:'', harga:'', tamu:'', tag:'Available', gambar:[], fasilitas:[], rules:[], order:[{detail:'Whatsapp',link:'https://wa.me/6285888815722',ikon:'la:whatsapp'}] }
+  const imgChecks = allImages.map(f => `<label style="display:inline-block;margin:2px"><input type="checkbox" value="${f}" ${(u.gambar||[]).includes(f)?'checked':''}> <img src="/img/units/${f}" style="width:60px;height:60px;object-fit:cover;border-radius:4px;vertical-align:middle"></label>`).join('')
+  el.innerHTML = `<div class="card">
+    <h2>${unit ? 'Edit' : 'Tambah'} Unit</h2>
+    <label>Judul</label><input id="f-judul" value="${esc(u.judul)}">
+    <label>Fitur (HTML)</label><input id="f-fitur" value="${esc(u.fitur)}" placeholder="4 bedrooms &amp;emsp; 8 guests">
+    <label>Deskripsi Singkat</label><textarea id="f-desc">${esc(u.desc)}</textarea>
+    <label>Detail</label><textarea id="f-detail">${esc(u.detail)}</textarea>
+    <label>Harga</label><input id="f-harga" value="${esc(u.harga)}" placeholder="Rp.1.000.000/malam">
+    <label>Tamu</label><input id="f-tamu" value="${esc(u.tamu)}" type="number">
+    <label>Status</label><select id="f-tag"><option ${u.tag==='Available'?'selected':''}>Available</option><option ${u.tag==='Not Available'?'selected':''}>Not Available</option></select>
+    <label>Foto Unit (pilih dari yang sudah diupload)</label>
+    <div class="img-grid">${imgChecks || '<p style="color:#999">Belum ada foto. Upload dulu.</p>'}</div>
+    <hr style="margin:1rem 0">
+    <h3>Fasilitas <button class="btn btn-sm" onclick="addFasilitas()">+ Tambah</button></h3>
+    <div id="fasilitas-list">${(u.fasilitas||[]).map((f,i) => `<span class="chip">${f.nama} <button onclick="this.parentElement.remove()">x</button><input type="hidden" data-fn="${f.nama}" data-fi="${f.ikon}"></span>`).join('')}</div>
+    <hr style="margin:1rem 0">
+    <h3>Rules <button class="btn btn-sm" onclick="addRule()">+ Tambah</button></h3>
+    <div id="rules-list">${(u.rules||[]).map(r => `<span class="chip">${r.aturan} <button onclick="this.parentElement.remove()">x</button><input type="hidden" data-rn="${r.aturan}" data-ri="${r.ikon}"></span>`).join('')}</div>
+    <hr style="margin:1rem 0">
+    <div style="margin-top:1rem">
+      <button class="btn btn-primary" onclick="saveUnit(${u.id})">Simpan</button>
+      <button class="btn" onclick="showList()">Batal</button>
+    </div>
+  </div>`
+}
+
+function esc(s) { return (s||'').replace(/"/g,'&quot;').replace(/</g,'&lt;') }
+
+function addFasilitas() {
+  const n = prompt('Nama fasilitas:'); if(!n) return
+  const i = prompt('Icon (iconify, ex: mdi:bed-outline):', 'mdi:bed-outline'); if(!i) return
+  const el = document.getElementById('fasilitas-list')
+  el.innerHTML += `<span class="chip">${n} <button onclick="this.parentElement.remove()">x</button><input type="hidden" data-fn="${n}" data-fi="${i}"></span>`
+}
+function addRule() {
+  const n = prompt('Rule:'); if(!n) return
+  const i = prompt('Icon:', 'mdi:no-smoking'); if(!i) return
+  const el = document.getElementById('rules-list')
+  el.innerHTML += `<span class="chip">${n} <button onclick="this.parentElement.remove()">x</button><input type="hidden" data-rn="${n}" data-ri="${i}"></span>`
+}
+
+function editUnit(id) { showForm(units.find(u => u.id === id)) }
+
+async function delUnit(id) {
+  if (!confirm('Yakin hapus unit ini?')) return
+  await fetch(`${API}/units/${id}`, { method: 'DELETE' })
+  await load()
+}
+
+async function saveUnit(id) {
+  const gambar = [...document.querySelectorAll('.img-grid input:checked')].map(cb => cb.value)
+  const fasilitas = [...document.querySelectorAll('#fasilitas-list input')].map(h => ({ nama: h.dataset.fn, ikon: h.dataset.fi }))
+  const rules = [...document.querySelectorAll('#rules-list input')].map(h => ({ aturan: h.dataset.rn, ikon: h.dataset.ri }))
+  const body = {
+    judul: document.getElementById('f-judul').value,
+    fitur: document.getElementById('f-fitur').value,
+    desc: document.getElementById('f-desc').value,
+    detail: document.getElementById('f-detail').value,
+    harga: document.getElementById('f-harga').value,
+    tamu: document.getElementById('f-tamu').value,
+    tag: document.getElementById('f-tag').value,
+    gambar, fasilitas, rules,
+    order: [{ detail:'Whatsapp', link:'https://wa.me/6285888815722?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900', ikon:'la:whatsapp' }]
+  }
+  if (id) {
+    await fetch(`${API}/units/${id}`, { method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+  } else {
+    await fetch(`${API}/units`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) })
+  }
+  await load()
+}
+
+// Image upload
+document.addEventListener('dragover', e => e.preventDefault())
+document.addEventListener('drop', async e => {
+  e.preventDefault()
+  const files = e.dataTransfer.files
+  if (!files.length) return
+  const fd = new FormData()
+  for (const f of files) fd.append('file', f, f.name)
+  const res = await fetch(`${API}/upload`, { method: 'POST', body: fd })
+  const data = await res.json()
+  alert(`Uploaded: ${data.files.join(', ')}`)
+  allImages = await (await fetch(`${API}/images`)).json()
+})
+
+load()
+</script>
+</body>
+</html>
