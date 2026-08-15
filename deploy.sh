@@ -17,6 +17,11 @@ git add -A
 git commit -m 'deploy'
 
 # push to GitHub Pages production branch
-git push -f git@github.com:kristofanf/paviliun900.git master:production
+# Uses GITHUB_TOKEN env var or falls back to interactive auth
+if [ -n "$GITHUB_TOKEN" ]; then
+  git push -f https://kristofanf:${GITHUB_TOKEN}@github.com/kristofanf/paviliun900.git master:production
+else
+  git push -f https://github.com/kristofanf/paviliun900.git master:production
+fi
 
 cd -
