@@ -1,7 +1,7 @@
 import express from 'express'
 import multer from 'multer'
 import { readFileSync, writeFileSync, existsSync, readdirSync, unlinkSync, mkdirSync } from 'node:fs'
-import { join, resolve } from 'node:path'
+import { join, resolve, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
@@ -13,10 +13,23 @@ const PORT = 3456
 
 mkdirSync(IMG, { recursive: true })
 
+const MIME = { '.jpg':'image/jpeg','.jpeg':'image/jpeg','.png':'image/png','.webp':'image/webp','.gif':'image/gif','.svg':'image/svg+xml' }
+
 const app = express()
 app.use(express.json({ limit: '10mb' }))
 app.use((_, res, next) => { res.setHeader('Access-Control-Allow-Origin', '*'); next() })
-app.use('/img/units', express.static(IMG))
+
+// Static image serving middleware (Express v5 compatible)
+app.use((req, res, next) => {
+  if (!req.path.startsWith('/img/units/') || req.method !== 'GET') return next()
+  const name = req.path.replace('/img/units/', '')
+  const file = join(IMG, name)
+  if (!existsSync(file)) return next()
+  const mime = MIME[extname(file).toLowerCase()] || 'application/octet-stream'
+  res.setHeader('Content-Type', mime)
+  res.setHeader('Cache-Control', 'public, max-age=86400')
+  res.sendFile(file)
+})
 
 const upload = multer({
   storage: multer.diskStorage({
