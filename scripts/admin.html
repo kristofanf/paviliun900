@@ -59,12 +59,20 @@ textarea{min-height:80px;resize:vertical}
 /* ── Modal ── */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
 .modal-overlay.show{opacity:1;pointer-events:all}
-.modal-box{background:var(--card);border-radius:var(--radius);padding:1.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.25);transform:translateY(10px);transition:transform .2s}
+.modal-box{background:var(--card);border-radius:var(--radius);padding:1.5rem;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.25);transform:translateY(10px);transition:transform .2s;max-height:85vh;display:flex;flex-direction:column}
 .modal-overlay.show .modal-box{transform:translateY(0)}
-.modal-box h3{font-size:.95rem;margin-bottom:1rem}
-.modal-box input{width:100%;margin-bottom:.5rem}
+.modal-box h3{font-size:.95rem;margin-bottom:1rem;flex-shrink:0}
+.modal-box input[type=text],.modal-box input[type=password]{width:100%;margin-bottom:.5rem}
 .modal-box .error{margin-top:.25rem}
-.modal-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem}
+.modal-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem;flex-shrink:0}
+.pick-search{width:100%;padding:.5rem .75rem;border:1px solid var(--border);border-radius:8px;font-size:.85rem;margin-bottom:.75rem;font-family:inherit}
+.pick-search:focus{outline:none;border-color:var(--accent)}
+.pick-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;overflow-y:auto;flex:1;padding:2px}
+.pick-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;border:1.5px solid var(--border);transition:.15s;font-size:.82rem;user-select:none}
+.pick-item:hover{border-color:#bbb;background:#f9f9f9}
+.pick-item.selected{border-color:var(--accent);background:#f0f0f0}
+.pick-item input{display:none}
+.pick-item .pick-icon{flex-shrink:0;width:20px;display:flex;align-items:center;justify-content:center}
 #deploy-toast{display:none;position:fixed;top:70px;right:20px;background:#111;color:#fff;padding:1rem 1.5rem;border-radius:10px;z-index:999;max-width:400px;font-size:.85rem;box-shadow:0 4px 20px rgba(0,0,0,.3)}
 </style>
 </head>
@@ -245,17 +253,52 @@ const KNOWN_RULES=[
 function renderIconPreview(ikon){return `<iconify-icon icon="${ikon}" width="16" height="16" style="vertical-align:middle"></iconify-icon>`}
 
 async function pickFromList(title, allItems, selectedKeys) {
-  const items = allItems.map(it => {
-    const key = it.n+'||'+it.i;
-    const checked = selectedKeys.has(key) ? 'checked' : '';
-    return `<label style="display:flex;align-items:center;gap:.5rem;padding:.3rem .4rem;cursor:pointer;border-radius:6px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''">
-      <input type="checkbox" data-pick value="${esc(it.n)}||${esc(it.i)}" ${checked}>
-      ${renderIconPreview(it.i)} <span style="font-size:.85rem">${it.n}</span>
-    </label>`;
+  const id='pick-'+Date.now();
+  const grid=allItems.map(it => {
+    const key=it.n+'||'+it.i;
+    const sel=selectedKeys.has(key);
+    return `<div class="pick-item${sel?' selected':''}" data-key="${esc(key)}" onclick="_pickToggle(this)">
+      <input type="checkbox" data-pick value="${esc(it.n)}||${esc(it.i)}" ${sel?'checked':''}>
+      <span class="pick-icon">${renderIconPreview(it.i)}</span>
+      <span>${it.n}</span>
+    </div>`;
   }).join('');
-  return modalShow(title, `<div style="max-height:300px;overflow-y:auto">${items}</div>`, {okText:'Pilih', confirm:true})
-    .then(ok => ok ? [...document.querySelectorAll('input[data-pick]:checked')].map(c => c.value) : null);
+  const body=`<input class="pick-search" type="text" placeholder="Cari…" oninput="filterPick(this)">
+    <div class="pick-grid" id="${id}">${grid}</div>
+    <div style="text-align:right;margin-top:.5rem"><button class="btn btn-sm" onclick="addCustomPick('${id}')">+ Tambah Manual</button></div>`;
+  // Toggle click on items
+  window._pickToggle=function(el){
+    const cb=el.querySelector('input');
+    cb.checked=!cb.checked;
+    el.classList.toggle('selected',cb.checked);
+  };
+  window._pickId=id;
+  return modalShow(title, body, {okText:'Pilih', confirm:true})
+    .then(ok => ok ? [...document.querySelectorAll(`#${id} input[data-pick]:checked`)].map(c => c.value) : null);
 }
+window.filterPick=function(inp){
+  const q=inp.value.toLowerCase();
+  document.querySelectorAll(`#${window._pickId} .pick-item`).forEach(el=>{
+    el.style.display=el.textContent.toLowerCase().includes(q)?'':'none';
+  });
+};
+window.addCustomPick=function(gridId){
+  const n=prompt('Nama:');
+  if(!n)return;
+  const i=prompt('Icon (iconify):','mdi:star-outline');
+  if(!i)return;
+  const key=n+'||'+i;
+  const grid=document.getElementById(gridId);
+  const div=document.createElement('div');
+  div.className='pick-item selected';
+  div.setAttribute('data-key',key);
+  div.innerHTML=`<input type="checkbox" data-pick value="${esc(key)}" checked>
+    <span class="pick-icon">${renderIconPreview(i)}</span>
+    <span>${esc(n)}</span>`;
+  div.setAttribute('onclick','_pickToggle(this)');
+  grid.appendChild(div);
+  grid.scrollTop=grid.scrollHeight;
+};
 
 function copyUnit(id){
   const src=units.find(x=>x.id===id);
@@ -354,30 +397,46 @@ function renderChips(listId, items, tag1, tag2){
   }).join('');
 }
 function knownSet(items){return new Set(items.map(it=>it.n+'||'+it.i))}
+function getCustomFac(){return (settings.customFasilitas||[]).map(s=>{const[n,i]=s.split('||');return{n,i}})}
+function getCustomRules(){return (settings.customRules||[]).map(s=>{const[n,i]=s.split('||');return{n,i}})}
+function mergeKnown(known, custom){return [...known, ...custom.filter(c=>!known.some(k=>k.n===c.n&&k.i===c.i))]}
+function saveCustom(type, items){
+  settings[type]=items;
+  api('/api/settings',{method:'PUT',body:JSON.stringify(settings)});
+}
+
 async function pickFac(){
-  const known=knownSet(KNOWN_FAC);
+  const all=mergeKnown(KNOWN_FAC, getCustomFac());
+  const known=all.length;
   const sel=getSelectedKeys('fac-list');
-  const manual=getManualItems('fac-list', known);
-  const picked=await pickFromList('Pilih Fasilitas', KNOWN_FAC, sel);
+  const manual=getManualItems('fac-list', knownSet(all));
+  const picked=await pickFromList('Pilih Fasilitas', all, sel);
   if(picked===null)return;
-  const n=await mPrompt('Atau tambah manual','Nama fasilitas (kosongkan jika sudah cukup)');
-  if(n){
-    const i=await mPrompt('Icon (iconify)','mdi:bed-outline');
-    if(i) picked.push(`${n}||${i}`);
-  }
+  // Save any new manual items to custom list
+  const newCustom=[];
+  picked.forEach(v=>{
+    const[n,i]=v.split('||');
+    if(!KNOWN_FAC.some(k=>k.n===n&&k.i===i) && !newCustom.includes(v)) newCustom.push(v);
+  });
+  const merged=[...(settings.customFasilitas||[]),...newCustom];
+  const unique=[...new Set(merged)];
+  saveCustom('customFasilitas', unique);
   renderChips('fac-list', [...manual,...picked], 'f', 'f');
 }
 async function pickRule(){
-  const known=knownSet(KNOWN_RULES);
+  const all=mergeKnown(KNOWN_RULES, getCustomRules());
   const sel=getSelectedKeys('rule-list');
-  const manual=getManualItems('rule-list', known);
-  const picked=await pickFromList('Pilih House Rules', KNOWN_RULES, sel);
+  const manual=getManualItems('rule-list', knownSet(all));
+  const picked=await pickFromList('Pilih House Rules', all, sel);
   if(picked===null)return;
-  const n=await mPrompt('Atau tambah manual','Rule (kosongkan jika sudah cukup)');
-  if(n){
-    const i=await mPrompt('Icon (iconify)','mdi:no-smoking');
-    if(i) picked.push(`${n}||${i}`);
-  }
+  const newCustom=[];
+  picked.forEach(v=>{
+    const[n,i]=v.split('||');
+    if(!KNOWN_RULES.some(k=>k.n===n&&k.i===i) && !newCustom.includes(v)) newCustom.push(v);
+  });
+  const merged=[...(settings.customRules||[]),...newCustom];
+  const unique=[...new Set(merged)];
+  saveCustom('customRules', unique);
   renderChips('rule-list', [...manual,...picked], 'r', 'r');
 }
 
