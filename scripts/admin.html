@@ -52,11 +52,20 @@ textarea{min-height:80px;resize:vertical}
 .section-title{font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:1.5rem 0 .75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
 .preview-img{width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border)}
 .flex-between{display:flex;justify-content:space-between;align-items:center}
-#deploy-toast{display:none;position:fixed;top:70px;right:20px;background:#111;color:#fff;padding:1rem 1.5rem;border-radius:10px;z-index:999;max-width:400px;font-size:.85rem;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.error{color:var(--danger);font-size:.8rem;margin-top:.5rem}
 .price-input{display:flex;gap:.5rem;align-items:flex-end}
 .price-input input{flex:1}
 .price-input select{width:140px;flex:none}
-.error{color:var(--danger);font-size:.8rem;margin-top:.5rem}
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.show{opacity:1;pointer-events:all}
+.modal-box{background:var(--card);border-radius:var(--radius);padding:1.5rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.25);transform:translateY(10px);transition:transform .2s}
+.modal-overlay.show .modal-box{transform:translateY(0)}
+.modal-box h3{font-size:.95rem;margin-bottom:1rem}
+.modal-box input{width:100%;margin-bottom:.5rem}
+.modal-box .error{margin-top:.25rem}
+.modal-actions{display:flex;justify-content:flex-end;gap:.5rem;margin-top:1rem}
+#deploy-toast{display:none;position:fixed;top:70px;right:20px;background:#111;color:#fff;padding:1rem 1.5rem;border-radius:10px;z-index:999;max-width:400px;font-size:.85rem;box-shadow:0 4px 20px rgba(0,0,0,.3)}
 </style>
 </head>
 <body>
@@ -79,6 +88,16 @@ textarea{min-height:80px;resize:vertical}
     </div>
   </div>
   <div id="deploy-toast"></div>
+<div id="modal-overlay" class="modal-overlay">
+  <div class="modal-box">
+    <h3 id="modal-title"></h3>
+    <div id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn" id="modal-cancel">Batal</button>
+      <button class="btn btn-accent" id="modal-ok">OK</button>
+    </div>
+  </div>
+</div>
   <div class="container">
     <div id="page-units" class="page active"></div>
     <div id="page-homepage" class="page"></div>
@@ -87,6 +106,59 @@ textarea{min-height:80px;resize:vertical}
 </div>
 <script>
 let AUTH='', units=[], settings={}, images=[];
+
+// ── MODAL SYSTEM ──
+function modalShow(title, bodyHTML, opts={}) {
+  return new Promise(resolve => {
+    const ov=document.getElementById('modal-overlay');
+    document.getElementById('modal-title').textContent=title;
+    document.getElementById('modal-body').innerHTML=bodyHTML;
+    document.getElementById('modal-cancel').style.display=opts.confirm?'inline-flex':'none';
+    document.getElementById('modal-ok').textContent=opts.okText||'OK';
+    ov.classList.add('show');
+    const first=ov.querySelector('input'); if(first) setTimeout(()=>first.focus(),100);
+    function close(val){ov.classList.remove('show');document.removeEventListener('keydown',onKey);resolve(val)}
+    function onKey(e){if(e.key==='Escape')close(null);if(e.key==='Enter')close(getVal())}
+    function getVal(){const inp=ov.querySelector('#modal-input'); return inp?inp.value:(opts.confirm?true:null)}
+    document.addEventListener('keydown',onKey);
+    document.getElementById('modal-ok').onclick=()=>close(getVal());
+    document.getElementById('modal-cancel').onclick=()=>close(null);
+    ov.onclick=e=>{if(e.target===ov)close(null)};
+  });
+}
+function mPrompt(title, placeholder='', def='') {
+  return modalShow(title, `<input id="modal-input" placeholder="${placeholder}" value="${def}">`);
+}
+function mConfirm(msg) {
+  return modalShow('Konfirmasi', `<p>${msg}</p>`, {confirm:true, okText:'Ya, Hapus'});
+}
+function mAlert(msg) {
+  return modalShow('Info', `<p>${msg}</p>`, {okText:'OK'});
+}
+function mPromptMulti(fields) {
+  const html=fields.map(f=>`<label style="margin-bottom:2px">${f.label}</label><input id="mp-${f.id}" placeholder="${f.placeholder||''}" value="${f.value||''}">`).join('');
+  return modalShow(fields[0].title||'Isi Data', html).then(()=>{
+    const r={}; fields.forEach(f=>{r[f.id]=document.getElementById('mp-'+f.id)?.value||''}); return r;
+  });
+}
+
+// ── PRICE FORMATTER ──
+function fmtInput(n){ return n ? String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.') : '' }
+function unfmtInput(s){ return parseInt((s||'').replace(/\./g,''),10)||0 }
+function bindPrice(el, val){
+  el.value=fmtInput(val);
+  el.addEventListener('input',e=>{
+    const pos=e.target.selectionStart;
+    const prev=el.value;
+    const raw=prev.replace(/\D/g,'');
+    el.value=fmtInput(raw);
+    const diff=el.value.length-prev.length;
+    el.setSelectionRange(pos+diff,pos+diff);
+  });
+  el.setAttribute('data-raw',val||0);
+  return el;
+}
+function getRawPrice(){return parseInt(document.getElementById('fu-harga')?.getAttribute('data-raw')||'0',10)}
 
 // ── AUTH ──
 async function doLogin(){
@@ -161,7 +233,7 @@ function editUnit(id){
   document.getElementById('page-units').innerHTML=`<div class="card">
     <h2>${id?'Edit':'Tambah'} Unit</h2>
     <div class="field"><label>Judul</label><input id="fu-judul" value="${esc(u.judul)}"></div>
-    <div class="row"><div class="field"><label>Harga (Rp)</label><input id="fu-harga" type="number" min="0" value="${u.harga||''}" placeholder="1000000" style="font-variant-numeric:tabular-nums"></div>
+    <div class="row"><div class="field"><label>Harga (Rp)</label><input id="fu-harga" type="text" inputmode="numeric" placeholder="1.000.000" style="font-variant-numeric:tabular-nums"></div>
     <div class="field"><label>Satuan</label><select id="fu-satuan"><option value="malam" ${u.satuan==='malam'?'selected':''}>/malam</option><option value="tahun" ${u.satuan==='tahun'?'selected':''}>/tahun</option><option value="bulan" ${u.satuan==='bulan'?'selected':''}>/bulan</option></select></div>
     <div class="field"><label>Tamu</label><input id="fu-tamu" type="number" value="${u.tamu}"></div>
     <div class="field"><label>Status</label><select id="fu-tag"><option ${u.tag==='Available'?'selected':''}>Available</option><option ${u.tag==='Not Available'?'selected':''}>Not Available</option></select></div></div>
@@ -170,7 +242,8 @@ function editUnit(id){
     <div class="field" style="margin-top:1rem"><label>Deskripsi Singkat</label><textarea id="fu-desc">${esc(u.desc)}</textarea></div>
     <div class="field"><label>Detail Lengkap</label><textarea id="fu-detail" style="min-height:120px">${esc(u.detail)}</textarea></div>
     <div class="section-title">Foto Unit</div>
-    <div class="img-grid">${imgChecks||'<p style="color:var(--muted)">Upload foto dulu di tab Media</p>'}</div>
+    <div style="margin-bottom:.75rem"><label class="btn btn-sm" style="cursor:pointer">📁 Upload Foto Baru<input type="file" id="fu-upload-input" multiple accept="image/*" style="display:none"></label></div>
+    <div class="img-grid">${imgChecks||'<p style="color:var(--muted)">Upload foto atau pilih dari Media Library</p>'}</div>
     <div class="section-title">Fasilitas <button class="btn btn-sm" onclick="addChip('fac')">+ Tambah</button></div>
     <div id="fac-list">${facs}</div>
     <div class="section-title">House Rules <button class="btn btn-sm" onclick="addChip('rule')">+ Tambah</button></div>
@@ -179,15 +252,26 @@ function editUnit(id){
       <button class="btn btn-accent" onclick="saveUnit(${id})">Simpan</button>
       <button class="btn" onclick="renderUnits()">Batal</button>
     </div></div>`;
+  // Bind price formatter
+  bindPrice(document.getElementById('fu-harga'), u.harga||0);
+  // Upload handler for inline upload
+  const iu=document.getElementById('fu-upload-input');
+  if(iu) iu.addEventListener('change',async e=>{
+    if(!e.target.files.length)return;
+    const fd=new FormData();for(const f of e.target.files) fd.append('files',f,f.name);
+    await fetch('/api/upload',{method:'POST',headers:{'X-Auth-Token':AUTH},body:fd});
+    images=await api('/api/images');
+    editUnit(id);
+  });
 }
 
-function addFitur(){
-  const n=prompt('Fitur (contoh: 4 Bedrooms):'); if(!n)return;
+async function addFitur(){
+  const n=await mPrompt('Tambah Fitur','contoh: 4 Bedrooms'); if(!n)return;
   document.getElementById('fitur-list').innerHTML+=`<span class="chip">${esc(n)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fit value="${esc(n)}"></span>`;
 }
-function addChip(type){
-  const n=prompt(type==='fac'?'Nama fasilitas:':'Rule:'); if(!n)return;
-  const i=prompt('Icon (iconify):',type==='fac'?'mdi:bed-outline':'mdi:no-smoking'); if(!i)return;
+async function addChip(type){
+  const n=await mPrompt(type==='fac'?'Nama Fasilitas':'Rule','contoh: '+(type==='fac'?'Wifi':'No Smoking')); if(!n)return;
+  const i=await mPrompt('Icon (iconify)',type==='fac'?'mdi:bed-outline':'mdi:no-smoking'); if(!i)return;
   document.getElementById(type==='fac'?'fac-list':'rule-list').innerHTML+=`<span class="chip">${n} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-${type==='fac'?'fn':'rn'} data-${type==='fac'?'fi':'ri'} value="${n}||${i}"></span>`;
 }
 
@@ -196,14 +280,14 @@ async function saveUnit(id){
   const fitur=[...document.querySelectorAll('#fitur-list input[data-fit]')].map(h=>h.value);
   const facs=[...document.querySelectorAll('#fac-list input')].map(h=>{const[n,i]=h.value.split('||');return{nama:n,ikon:i}});
   const rls=[...document.querySelectorAll('#rule-list input')].map(h=>{const[n,i]=h.value.split('||');return{aturan:n,ikon:i}});
-  const body={judul:v('fu-judul'),fitur,desc:v('fu-desc'),detail:v('fu-detail'),harga:parseInt(v('fu-harga'))||0,satuan:v('fu-satuan'),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900`,ikon:'la:whatsapp'}]};
+  const body={judul:v('fu-judul'),fitur,desc:v('fu-desc'),detail:v('fu-detail'),harga:getRawPrice(),satuan:v('fu-satuan'),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900`,ikon:'la:whatsapp'}]};
   if(id){await api(`/api/units/${id}`,{method:'PUT',body:JSON.stringify(body)})}
   else{await api('/api/units',{method:'POST',body:JSON.stringify(body)})}
   units=await api('/api/units');
   renderUnits();
 }
 async function delUnit(id){
-  if(!confirm('Hapus unit ini?'))return;
+  if(!await mConfirm('Hapus unit ini? Data tidak bisa dikembalikan.'))return;
   await api(`/api/units/${id}`,{method:'DELETE'});
   units=await api('/api/units');
   renderUnits();
@@ -248,14 +332,15 @@ function renderHomepage(){
     </div>
     <button class="btn btn-accent" onclick="saveSettings()">Simpan Semua Pengaturan</button>`;
 }
-function addNearby(){const n=prompt('Tempat terdekat:');if(n)document.getElementById('hl-nearby').innerHTML+=`<span class="chip">${n}<button onclick="this.parentElement.remove()">×</button></span>`}
-function addReview(){
-  const a=prompt('Nama reviewer:');if(!a)return;const t=prompt('Isi review:');if(!t)return;
-  document.getElementById('hr-list').innerHTML+=`<span class="chip">${a}: ${t.slice(0,30)}…<button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rv value="${esc(t)}||${esc(a)}"></span>`;
+async function addNearby(){const n=await mPrompt('Tempat Terdekat','contoh: 5 menit ke UGM');if(n)document.getElementById('hl-nearby').innerHTML+=`<span class="chip">${n}<button onclick="this.parentElement.remove()">×</button></span>`}
+async function addReview(){
+  const r=await mPromptMulti([{id:'author',label:'Nama Reviewer',title:'Tambah Review',placeholder:'Agung'},{id:'text',label:'Isi Review',placeholder:'Comfy place to stay!'}]);
+  if(!r||!r.author||!r.text)return;
+  document.getElementById('hr-list').innerHTML+=`<span class="chip">${r.author}: ${r.text.slice(0,30)}…<button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rv value="${esc(r.text)}||${esc(r.author)}"></span>`;
 }
 async function saveSettings(){
   const s={site:{name:v('hs-name'),whatsapp:v('hs-wa'),email:v('hs-email'),airbnbUrl:v('hs-airbnb')},hero:{title:v('hh-title'),subtitle:v('hh-sub'),coverImage:v('hh-img')},about:{text:v('ha-text'),image:v('ha-img')},location:{address:v('hl-addr'),mapEmbed:v('hl-map'),nearby:[...document.querySelectorAll('#hl-nearby .chip')].map(c=>c.childNodes[0].textContent.trim())},reviews:[...document.querySelectorAll('#hr-list input[data-rv]')].map(h=>{const[t,a]=h.value.split('||');return{text:t,author:a}}),footer:{warning:v('hf-warn')}};
-  await api('/api/settings',{method:'PUT',body:JSON.stringify(s)});settings=s;alert('Tersimpan!');
+  await api('/api/settings',{method:'PUT',body:JSON.stringify(s)});settings=s;await mAlert('Pengaturan tersimpan!');
 }
 
 // ── MEDIA PAGE ──
@@ -288,14 +373,14 @@ async function uploadFiles(fileList){
   document.getElementById('upload-status').innerHTML=`✅ Terupload`;renderMedia();renderUnits();
 }
 async function delImg(name){
-  if(!confirm(`Hapus ${name}?`))return;
+  if(!await mConfirm(`Hapus foto "${name}"?`))return;
   await api(`/api/images/${encodeURIComponent(name)}`,{method:'DELETE'});
-  images=await api('/api/images');renderMedia();
+  images=await api('/api/images');renderMedia();renderUnits();
 }
 
 // ── DEPLOY ──
 function getToken(){return localStorage.getItem('gh_token')||''}
-function setupToken(){const t=prompt('GitHub Personal Access Token:',getToken());if(t){localStorage.setItem('gh_token',t);document.getElementById('token-btn').textContent='🔑 Token ✓'}}
+async function setupToken(){const t=await mPrompt('GitHub Personal Access Token','ghp_...',getToken());if(t){localStorage.setItem('gh_token',t);document.getElementById('token-btn').textContent='🔑 Token ✓'}}
 async function deployLive(){
   const token=getToken();if(!token){setupToken();return}
   const btn=document.getElementById('deploy-btn'),toast=document.getElementById('deploy-toast');
