@@ -225,7 +225,7 @@ function renderUnits(){
     const price=u.harga?.length>1?`Mulai dari ${fmtRp(Math.min(...u.harga.map(t=>t.amount)))}`:fmtRp(u.harga?.[0]?.amount)+(u.harga?.[0]?.satuan?`/${u.harga[0].satuan}`:'');
     h+=`<div class="unit-row"><div style="display:flex;align-items:center;gap:1rem">
       ${img0?`<img src="/img/units/${img0}" class="preview-img">`:''}
-      <div class="unit-info"><strong>${u.judul}</strong> ${tag}<br><small>${price} · ${u.tamu} tamu · ${(u.gambar||[]).length} foto</small></div></div>
+      <div class="unit-info"><strong>${u.judul}</strong> ${tag}<br><small>${u.luas?u.luas+' m² · ':''}${price} · ${u.tamu} tamu · ${(u.gambar||[]).length} foto</small></div></div>
       <div class="actions"><button class="btn btn-sm" onclick="copyUnit(${u.id})" title="Duplikat">📋</button><button class="btn btn-sm" onclick="editUnit(${u.id})">Edit</button><button class="btn btn-sm btn-danger" onclick="delUnit(${u.id})">Hapus</button></div></div>`;
   });
   el.innerHTML=h+'</div>';
@@ -355,6 +355,7 @@ function copyUnit(id){
   // Pre-fill form with cloned data after render
   setTimeout(()=>{
     document.getElementById('fu-judul').value=clone.judul;
+    if(clone.luas) document.getElementById('fu-luas').value=clone.luas;
     document.getElementById('fu-tamu').value=clone.tamu;
     document.getElementById('fu-tag').value=clone.tag;
     document.getElementById('fu-desc').value=clone.desc||'';
@@ -384,7 +385,7 @@ function editUnit(id){
       <h2 style="margin:0">${id?'Edit':'Tambah'} Unit</h2>
     </div>
     <div class="field"><label>Judul</label><input id="fu-judul" value="${esc(u.judul)}"></div>
-    <div class="row"><div class="field"><label>Tamu</label><input id="fu-tamu" type="number" value="${u.tamu}"></div>
+    <div class="row"><div class="field"><label>Luas (m²)</label><input id="fu-luas" type="number" min="0" value="${u.luas||''}" placeholder="90"></div><div class="field"><label>Tamu</label><input id="fu-tamu" type="number" value="${u.tamu}"></div>
     <div class="field"><label>Status</label><select id="fu-tag"><option ${u.tag==='Available'?'selected':''}>Available</option><option ${u.tag==='Not Available'?'selected':''}>Not Available</option></select></div></div>
     <div class="section-title">Harga <button class="btn btn-sm" onclick="addTier()">+ Tambah Tier</button></div>
     <div id="tier-list">${renderTiers(u.harga)}</div>
@@ -493,7 +494,7 @@ async function saveUnit(id){
   const fitur=[...document.querySelectorAll('#fitur-list input[data-fit]')].map(h=>h.value);
   const facs=[...document.querySelectorAll('#fac-list input')].map(h=>{const[n,i]=h.value.split('||');return{nama:n,ikon:i}});
   const rls=[...document.querySelectorAll('#rule-list input')].map(h=>{const[n,i]=h.value.split('||');return{aturan:n,ikon:i}});
-  const body={judul:v('fu-judul'),fitur,desc:v('fu-desc'),detail:v('fu-detail'),harga:collectTiers(),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900`,ikon:'la:whatsapp'}]};
+  const body={judul:v('fu-judul'),luas:parseInt(v('fu-luas'))||'',fitur,desc:v('fu-desc'),detail:v('fu-detail'),harga:collectTiers(),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900`,ikon:'la:whatsapp'}]};
   if(id){await api(`/api/units/${id}`,{method:'PUT',body:JSON.stringify(body)})}
   else{await api('/api/units',{method:'POST',body:JSON.stringify(body)})}
   units=await api('/api/units');

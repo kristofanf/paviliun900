@@ -32,6 +32,9 @@
           <v-chip v-for="(f, i) in (unit.fitur || [])" :key="i" size="small" variant="outlined" class="mr-1 mb-1">
             {{ f }}
           </v-chip>
+          <v-chip v-if="unit.luas" size="small" variant="flat" color="grey-lighten-3" class="mr-1 mb-1">
+            {{ unit.luas }} m²
+          </v-chip>
         </div>
         <h2 style="font-weight: 500">{{ unit.judul }}</h2>
         <hr style="width: 50%" />

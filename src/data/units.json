@@ -100,7 +100,8 @@
         "link": "https://wa.me/6285888815722?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900",
         "ikon": "la:whatsapp"
       }
-    ]
+    ],
+    "luas": ""
   },
   {
     "id": 2,
@@ -193,7 +194,8 @@
         "link": "https://wa.me/6285888815722?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900",
         "ikon": "la:whatsapp"
       }
-    ]
+    ],
+    "luas": ""
   },
   {
     "judul": "A21 Unit Compact & Modern",
@@ -283,6 +285,7 @@
         "ikon": "la:whatsapp"
       }
     ],
-    "id": 1786879207151
+    "id": 1786879207151,
+    "luas": ""
   }
 ]

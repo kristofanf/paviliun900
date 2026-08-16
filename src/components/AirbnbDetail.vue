@@ -15,7 +15,7 @@
           </v-chip>
         </div>
         <h3 class="detail-price">
-          {{ detailUnit.tamu }} Guests
+          {{ detailUnit.tamu }} Guests<template v-if="detailUnit.luas"> · {{ detailUnit.luas }} m²</template>
         </h3>
 
         <!-- Pricing Tiers -->
