@@ -42,7 +42,7 @@
           <p>{{ unit.desc }}</p>
           <h3 style="color: #5c5c5c" class="mt-2">
             <template v-if="(unit.harga || []).length > 1">
-              Mulai dari {{ hargaMulaiDari(unit.harga) }}
+              Starting from {{ hargaMulaiDari(unit.harga) }}
             </template>
             <template v-else>
               {{ formatHarga(unit.harga?.[0]?.amount, unit.harga?.[0]?.satuan) }}
