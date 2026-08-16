@@ -8,8 +8,11 @@
         </v-btn>
 
         <h1 class="text-start">{{ detailUnit.judul }}</h1>
+        <div class="mb-2">
+          <v-chip v-for="(f, i) in (detailUnit.fitur || [])" :key="i" size="small" variant="outlined" class="mr-1 mb-1">{{ f }}</v-chip>
+        </div>
         <h3 style="font-weight: 500" class="text-start mb-10">
-          {{ detailUnit.tamu }} Guests | {{ detailUnit.harga }}
+          {{ detailUnit.tamu }} Guests | {{ formatHarga(detailUnit.harga, detailUnit.satuan) }}
         </h3>
 
         <v-row>
@@ -121,6 +124,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
+import { formatHarga } from '@/utils/format'
 
 const router = useRouter()
 const detailUnit = ref(null)

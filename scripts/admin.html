@@ -4,22 +4,25 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Paviliun 900 — CMS</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#fafafa;--card:#fff;--border:#e8e8e8;--text:#1a1a1a;--muted:#888;--accent:#111;--accent-hover:#333;--danger:#dc3545;--success:#28a745;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.06)}
 body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+.login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:2.5rem;width:100%;max-width:380px;box-shadow:var(--shadow)}
+.login-card h1{font-size:1.2rem;text-align:center;margin-bottom:.3rem}
+.login-card p{text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:1.5rem}
 .topbar{background:var(--accent);color:#fff;padding:0 2rem;height:56px;display:flex;align-items:center;gap:2rem;position:sticky;top:0;z-index:100}
-.topbar h1{font-size:1rem;font-weight:600;letter-spacing:-.02em}
+.topbar h1{font-size:1rem;font-weight:600}
 .topbar nav a{color:rgba(255,255,255,.6);text-decoration:none;font-size:.85rem;font-weight:500;padding:.4rem .8rem;border-radius:6px;transition:.2s}
 .topbar nav a:hover,.topbar nav a.active{color:#fff;background:rgba(255,255,255,.1)}
 .container{max-width:960px;margin:0 auto;padding:2rem 1.5rem}
 .page{display:none}.page.active{display:block}
 .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
-.card h2{font-size:1rem;font-weight:600;margin-bottom:1.25rem;letter-spacing:-.01em;display:flex;align-items:center;gap:.5rem}
+.card h2{font-size:1rem;font-weight:600;margin-bottom:1.25rem}
 .btn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1rem;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:.8rem;font-weight:500;cursor:pointer;transition:.15s;font-family:inherit}
-.btn:hover{background:var(--bg)}.btn:active{transform:scale(.97)}
+.btn:hover{background:var(--bg)}.btn:active{transform:scale(.97)}.btn:disabled{opacity:.5;cursor:not-allowed}
 .btn-accent{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-accent:hover{background:var(--accent-hover)}
 .btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}.btn-danger:hover{background:#c82333}
 .btn-sm{padding:.35rem .7rem;font-size:.75rem}
@@ -49,44 +52,77 @@ textarea{min-height:80px;resize:vertical}
 .section-title{font-size:.8rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin:1.5rem 0 .75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
 .preview-img{width:48px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border)}
 .flex-between{display:flex;justify-content:space-between;align-items:center}
-.badge{background:var(--accent);color:#fff;padding:1px 8px;border-radius:10px;font-size:.7rem;font-weight:600}
+#deploy-toast{display:none;position:fixed;top:70px;right:20px;background:#111;color:#fff;padding:1rem 1.5rem;border-radius:10px;z-index:999;max-width:400px;font-size:.85rem;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.price-input{display:flex;gap:.5rem;align-items:flex-end}
+.price-input input{flex:1}
+.price-input select{width:140px;flex:none}
+.error{color:var(--danger);font-size:.8rem;margin-top:.5rem}
 </style>
 </head>
 <body>
-<div class="topbar">
-  <h1>Paviliun 900</h1>
-  <nav>
-    <a href="#" data-page="units" class="active">Units</a>
-    <a href="#" data-page="homepage">Homepage</a>
-    <a href="#" data-page="media">Media</a>
-  </nav>
-  <div style="margin-left:auto;display:flex;align-items:center;gap:.5rem">
-    <button class="btn btn-sm" onclick="setupToken()" style="color:#fff;border-color:rgba(255,255,255,.3);background:transparent;font-size:.75rem" id="token-btn">🔑 Setup Token</button>
-    <button class="btn btn-sm" onclick="deployLive()" style="background:#25D366;color:#fff;border-color:#25D366" id="deploy-btn">🚀 Deploy ke Live</button>
+<div id="login-page" class="login-wrap">
+  <div class="login-card">
+    <h1>Paviliun 900</h1>
+    <p>CMS Admin Panel</p>
+    <div class="field"><label>Password</label><input id="login-pass" type="password" placeholder="Masukkan password"></div>
+    <button class="btn btn-accent" style="width:100%;justify-content:center" onclick="doLogin()">Masuk</button>
+    <div id="login-error" class="error"></div>
   </div>
 </div>
-<div id="deploy-toast" style="display:none;position:fixed;top:70px;right:20px;background:#111;color:#fff;padding:1rem 1.5rem;border-radius:10px;z-index:999;max-width:400px;font-size:.85rem;box-shadow:0 4px 20px rgba(0,0,0,.3)"></div>
-<div class="container">
-  <div id="page-units" class="page active"></div>
-  <div id="page-homepage" class="page"></div>
-  <div id="page-media" class="page"></div>
+<div id="app-page" style="display:none">
+  <div class="topbar">
+    <h1>Paviliun 900</h1>
+    <nav><a href="#" data-page="units" class="active">Units</a><a href="#" data-page="homepage">Homepage</a><a href="#" data-page="media">Media</a></nav>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:.5rem">
+      <button class="btn btn-sm" onclick="setupToken()" style="color:#fff;border-color:rgba(255,255,255,.3);background:transparent;font-size:.75rem" id="token-btn">🔑 Setup Token</button>
+      <button class="btn btn-sm" onclick="deployLive()" style="background:#25D366;color:#fff;border-color:#25D366" id="deploy-btn">🚀 Deploy ke Live</button>
+    </div>
+  </div>
+  <div id="deploy-toast"></div>
+  <div class="container">
+    <div id="page-units" class="page active"></div>
+    <div id="page-homepage" class="page"></div>
+    <div id="page-media" class="page"></div>
+  </div>
 </div>
 <script>
-const API='';
-let units=[], settings={}, images=[];
+let AUTH='', units=[], settings={}, images=[];
+
+// ── AUTH ──
+async function doLogin(){
+  const pass=document.getElementById('login-pass').value;
+  try{
+    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pass})});
+    const d=await r.json();
+    if(d.ok){
+      AUTH=d.token; sessionStorage.setItem('auth',AUTH);
+      document.getElementById('login-page').style.display='none';
+      document.getElementById('app-page').style.display='block';
+      init();
+    }else{document.getElementById('login-error').textContent=d.error||'Gagal login'}
+  }catch(e){document.getElementById('login-error').textContent='Server error'}
+}
+document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
+if(sessionStorage.getItem('auth')){
+  AUTH=sessionStorage.getItem('auth');
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('app-page').style.display='block';
+  init();
+}
+function api(path,opts={}){
+  const h={'Content-Type':'application/json','X-Auth-Token':AUTH,...(opts.headers||{})};
+  return fetch(path,{...opts,headers:h}).then(r=>{if(r.status===401){sessionStorage.removeItem('auth');location.reload()}return r.json()});
+}
+function v(id){return document.getElementById(id)?.value||''}
+function esc(s){return(s||'').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+function fmtRp(n){return n?new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(n):'Rp 0'}
 
 async function init(){
-  [units,settings,images]=await Promise.all([
-    fetch(`${API}/api/units`).then(r=>r.json()),
-    fetch(`${API}/api/settings`).then(r=>r.json()),
-    fetch(`${API}/api/images`).then(r=>r.json()),
-  ]);
-  renderUnits();
-  renderHomepage();
-  renderMedia();
+  [units,settings,images]=await Promise.all([api('/api/units'),api('/api/settings'),api('/api/images')]);
+  renderUnits();renderHomepage();renderMedia();
+  if(getToken())document.getElementById('token-btn').textContent='🔑 Token ✓';
 }
 
-// NAV
 document.querySelectorAll('[data-page]').forEach(a=>{
   a.addEventListener('click',e=>{
     e.preventDefault();
@@ -106,33 +142,32 @@ function renderUnits(){
   sorted.forEach(u=>{
     const tag=u.tag==='Available'?'<span class="tag tag-avail">Available</span>':'<span class="tag tag-na">Not Available</span>';
     const img0=(u.gambar||[])[0];
-    h+=`<div class="unit-row">
-      <div style="display:flex;align-items:center;gap:1rem">
-        ${img0?`<img src="/img/units/${img0}" class="preview-img">`:''}
-        <div class="unit-info"><strong>${u.judul}</strong> ${tag}<br><small>${u.harga} · ${u.tamu} tamu · ${(u.gambar||[]).length} foto</small></div>
-      </div>
+    const price=fmtRp(u.harga)+(u.satuan?`/${u.satuan}`:'');
+    h+=`<div class="unit-row"><div style="display:flex;align-items:center;gap:1rem">
+      ${img0?`<img src="/img/units/${img0}" class="preview-img">`:''}
+      <div class="unit-info"><strong>${u.judul}</strong> ${tag}<br><small>${price} · ${u.tamu} tamu · ${(u.gambar||[]).length} foto</small></div></div>
       <div class="actions"><button class="btn btn-sm" onclick="editUnit(${u.id})">Edit</button><button class="btn btn-sm btn-danger" onclick="delUnit(${u.id})">Hapus</button></div></div>`;
   });
-  h+='</div>';
-  el.innerHTML=h;
+  el.innerHTML=h+'</div>';
 }
-function esc(s){return(s||'').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
 
 function editUnit(id){
-  const u=id?units.find(x=>x.id===id):{id:0,judul:'',fitur:'',desc:'',detail:'',harga:'',tamu:'',tag:'Available',gambar:[],fasilitas:[],rules:[],order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||'6285888815722'}`,ikon:'la:whatsapp'}]};
+  const u=id?units.find(x=>x.id===id):{id:0,judul:'',fitur:[],desc:'',detail:'',harga:0,satuan:'malam',tamu:'',tag:'Available',gambar:[],fasilitas:[],rules:[],order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}`,ikon:'la:whatsapp'}]};
   const imgChecks=images.map(f=>`<label><input type="checkbox" name="imgs" value="${f}" ${(u.gambar||[]).includes(f)?'checked':''}><img src="/img/units/${f}"></label>`).join('');
-  const facs=(u.fasilitas||[]).map((f,i)=>`<span class="chip">${f.nama} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${f.nama}||${f.ikon}"></span>`).join('');
+  const fiturChips=(u.fitur||[]).map(f=>`<span class="chip">${esc(f)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fit value="${esc(f)}"></span>`).join('');
+  const facs=(u.fasilitas||[]).map(f=>`<span class="chip">${f.nama} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${f.nama}||${f.ikon}"></span>`).join('');
   const rls=(u.rules||[]).map(r=>`<span class="chip">${r.aturan} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rn data-ri value="${r.aturan}||${r.ikon}"></span>`).join('');
 
-  const el=document.getElementById('page-units');
-  el.innerHTML=`<div class="card">
+  document.getElementById('page-units').innerHTML=`<div class="card">
     <h2>${id?'Edit':'Tambah'} Unit</h2>
     <div class="field"><label>Judul</label><input id="fu-judul" value="${esc(u.judul)}"></div>
-    <div class="row"><div class="field"><label>Harga</label><input id="fu-harga" value="${esc(u.harga)}" placeholder="Rp.1.000.000/malam"></div>
+    <div class="row"><div class="field"><label>Harga (Rp)</label><input id="fu-harga" type="number" min="0" value="${u.harga||''}" placeholder="1000000" style="font-variant-numeric:tabular-nums"></div>
+    <div class="field"><label>Satuan</label><select id="fu-satuan"><option value="malam" ${u.satuan==='malam'?'selected':''}>/malam</option><option value="tahun" ${u.satuan==='tahun'?'selected':''}>/tahun</option><option value="bulan" ${u.satuan==='bulan'?'selected':''}>/bulan</option></select></div>
     <div class="field"><label>Tamu</label><input id="fu-tamu" type="number" value="${u.tamu}"></div>
     <div class="field"><label>Status</label><select id="fu-tag"><option ${u.tag==='Available'?'selected':''}>Available</option><option ${u.tag==='Not Available'?'selected':''}>Not Available</option></select></div></div>
-    <div class="field"><label>Fitur (badge text)</label><input id="fu-fitur" value="${esc(u.fitur)}" placeholder="4 bedrooms &emsp; 8 guests"></div>
-    <div class="field"><label>Deskripsi Singkat</label><textarea id="fu-desc">${esc(u.desc)}</textarea></div>
+    <div class="section-title">Fitur Badges <button class="btn btn-sm" onclick="addFitur()">+ Tambah</button></div>
+    <div id="fitur-list">${fiturChips}</div>
+    <div class="field" style="margin-top:1rem"><label>Deskripsi Singkat</label><textarea id="fu-desc">${esc(u.desc)}</textarea></div>
     <div class="field"><label>Detail Lengkap</label><textarea id="fu-detail" style="min-height:120px">${esc(u.detail)}</textarea></div>
     <div class="section-title">Foto Unit</div>
     <div class="img-grid">${imgChecks||'<p style="color:var(--muted)">Upload foto dulu di tab Media</p>'}</div>
@@ -145,35 +180,40 @@ function editUnit(id){
       <button class="btn" onclick="renderUnits()">Batal</button>
     </div></div>`;
 }
+
+function addFitur(){
+  const n=prompt('Fitur (contoh: 4 Bedrooms):'); if(!n)return;
+  document.getElementById('fitur-list').innerHTML+=`<span class="chip">${esc(n)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fit value="${esc(n)}"></span>`;
+}
 function addChip(type){
   const n=prompt(type==='fac'?'Nama fasilitas:':'Rule:'); if(!n)return;
-  const i=prompt('Icon (iconify name):',type==='fac'?'mdi:bed-outline':'mdi:no-smoking'); if(!i)return;
-  const el=document.getElementById(type==='fac'?'fac-list':'rule-list');
-  el.innerHTML+=`<span class="chip">${n} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-${type==='fac'?'fn':'rn'} data-${type==='fac'?'fi':'ri'} value="${n}||${i}"></span>`;
+  const i=prompt('Icon (iconify):',type==='fac'?'mdi:bed-outline':'mdi:no-smoking'); if(!i)return;
+  document.getElementById(type==='fac'?'fac-list':'rule-list').innerHTML+=`<span class="chip">${n} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-${type==='fac'?'fn':'rn'} data-${type==='fac'?'fi':'ri'} value="${n}||${i}"></span>`;
 }
+
 async function saveUnit(id){
   const imgs=[...document.querySelectorAll('input[name=imgs]:checked')].map(c=>c.value);
+  const fitur=[...document.querySelectorAll('#fitur-list input[data-fit]')].map(h=>h.value);
   const facs=[...document.querySelectorAll('#fac-list input')].map(h=>{const[n,i]=h.value.split('||');return{nama:n,ikon:i}});
   const rls=[...document.querySelectorAll('#rule-list input')].map(h=>{const[n,i]=h.value.split('||');return{aturan:n,ikon:i}});
-  const body={judul:v('fu-judul'),fitur:v('fu-fitur'),desc:v('fu-desc'),detail:v('fu-detail'),harga:v('fu-harga'),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||'6285888815722'}?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900`,ikon:'la:whatsapp'}]};
-  if(id){await fetch(`${API}/api/units/${id}`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})}
-  else{await fetch(`${API}/api/units`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})}
-  units=await(await fetch(`${API}/api/units`)).json();
+  const body={judul:v('fu-judul'),fitur,desc:v('fu-desc'),detail:v('fu-detail'),harga:parseInt(v('fu-harga'))||0,satuan:v('fu-satuan'),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900`,ikon:'la:whatsapp'}]};
+  if(id){await api(`/api/units/${id}`,{method:'PUT',body:JSON.stringify(body)})}
+  else{await api('/api/units',{method:'POST',body:JSON.stringify(body)})}
+  units=await api('/api/units');
   renderUnits();
 }
 async function delUnit(id){
   if(!confirm('Hapus unit ini?'))return;
-  await fetch(`${API}/api/units/${id}`,{method:'DELETE'});
-  units=await(await fetch(`${API}/api/units`)).json();
+  await api(`/api/units/${id}`,{method:'DELETE'});
+  units=await api('/api/units');
   renderUnits();
 }
-function v(id){return document.getElementById(id)?.value||''}
 
 // ── HOMEPAGE PAGE ──
 function renderHomepage(){
   const s=settings, el=document.getElementById('page-homepage');
   const nearby=(s.location?.nearby||[]).map(t=>`<span class="chip">${t}<button onclick="this.parentElement.remove()">×</button></span>`).join('');
-  const reviews=(s.reviews||[]).map(r=>`<span class="chip">${r.author}: ${r.text.slice(0,30)}…<button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rv value="${esc(r.text)}||${esc(r.author)}"></span>`).join('');
+  const reviews=(s.reviews||[]).map(r=>`<span class="chip">${esc(r.author)}: ${esc(r.text).slice(0,30)}…<button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rv value="${esc(r.text)}||${esc(r.author)}"></span>`).join('');
   const imgOpts=images.map(f=>`<option value="${f}" ${f===s.hero?.coverImage?'selected':''}>${f}</option>`).join('');
   const imgOpts2=images.map(f=>`<option value="${f}" ${f===s.about?.image?'selected':''}>${f}</option>`).join('');
   el.innerHTML=`<h2 style="margin-bottom:1.25rem">Pengaturan Homepage</h2>
@@ -208,27 +248,14 @@ function renderHomepage(){
     </div>
     <button class="btn btn-accent" onclick="saveSettings()">Simpan Semua Pengaturan</button>`;
 }
-function addNearby(){
-  const n=prompt('Tempat terdekat:'); if(!n)return;
-  document.getElementById('hl-nearby').innerHTML+=`<span class="chip">${n}<button onclick="this.parentElement.remove()">×</button></span>`;
-}
+function addNearby(){const n=prompt('Tempat terdekat:');if(n)document.getElementById('hl-nearby').innerHTML+=`<span class="chip">${n}<button onclick="this.parentElement.remove()">×</button></span>`}
 function addReview(){
-  const a=prompt('Nama reviewer:'); if(!a)return;
-  const t=prompt('Isi review:'); if(!t)return;
+  const a=prompt('Nama reviewer:');if(!a)return;const t=prompt('Isi review:');if(!t)return;
   document.getElementById('hr-list').innerHTML+=`<span class="chip">${a}: ${t.slice(0,30)}…<button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rv value="${esc(t)}||${esc(a)}"></span>`;
 }
 async function saveSettings(){
-  const s={
-    site:{name:v('hs-name'),whatsapp:v('hs-wa'),email:v('hs-email'),airbnbUrl:v('hs-airbnb')},
-    hero:{title:v('hh-title'),subtitle:v('hh-sub'),coverImage:v('hh-img')},
-    about:{text:v('ha-text'),image:v('ha-img')},
-    location:{address:v('hl-addr'),mapEmbed:v('hl-map'),nearby:[...document.querySelectorAll('#hl-nearby .chip')].map(c=>c.childNodes[0].textContent.trim())},
-    reviews:[...document.querySelectorAll('#hr-list input[data-rv]')].map(h=>{const[t,a]=h.value.split('||');return{text:t,author:a}}),
-    footer:{warning:v('hf-warn')}
-  };
-  await fetch(`${API}/api/settings`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(s)});
-  settings=s;
-  alert('Tersimpan!');
+  const s={site:{name:v('hs-name'),whatsapp:v('hs-wa'),email:v('hs-email'),airbnbUrl:v('hs-airbnb')},hero:{title:v('hh-title'),subtitle:v('hh-sub'),coverImage:v('hh-img')},about:{text:v('ha-text'),image:v('ha-img')},location:{address:v('hl-addr'),mapEmbed:v('hl-map'),nearby:[...document.querySelectorAll('#hl-nearby .chip')].map(c=>c.childNodes[0].textContent.trim())},reviews:[...document.querySelectorAll('#hr-list input[data-rv]')].map(h=>{const[t,a]=h.value.split('||');return{text:t,author:a}}),footer:{warning:v('hf-warn')}};
+  await api('/api/settings',{method:'PUT',body:JSON.stringify(s)});settings=s;alert('Tersimpan!');
 }
 
 // ── MEDIA PAGE ──
@@ -239,19 +266,14 @@ function renderMedia(){
     <button onclick="delImg('${f}')" style="position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:.7rem;cursor:pointer;line-height:1">×</button>
     <div style="font-size:.65rem;color:var(--muted);text-align:center;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f}</div></div>`).join('');
   el.innerHTML=`<h2 style="margin-bottom:1.25rem">Media Library</h2>
-    <div class="card">
-      <div class="dropzone" id="dz">
-        <div style="font-size:2rem;margin-bottom:.5rem">📁</div>
-        <strong>Drag & drop foto di sini</strong><br><small>atau klik untuk pilih file (bisa multi-select)</small>
-        <input type="file" id="file-input" multiple accept="image/*">
-      </div>
-      <div id="upload-status" style="margin-top:.5rem;font-size:.8rem"></div>
-    </div>
+    <div class="card"><div class="dropzone" id="dz">
+      <div style="font-size:2rem;margin-bottom:.5rem">📁</div>
+      <strong>Drag & drop foto di sini</strong><br><small>atau klik untuk pilih file (bisa multi-select)</small>
+      <input type="file" id="file-input" multiple accept="image/*">
+    </div><div id="upload-status" style="margin-top:.5rem;font-size:.8rem"></div></div>
     <div class="card"><h2>Semua Foto (${images.length})</h2>
-      <div style="display:flex;flex-wrap:wrap;gap:8px">${imgs||'<p style="color:var(--muted)">Belum ada foto</p>'}</div>
-    </div>`;
-  const dz=document.getElementById('dz');
-  const fi=document.getElementById('file-input');
+      <div style="display:flex;flex-wrap:wrap;gap:8px">${imgs||'<p style="color:var(--muted)">Belum ada foto</p>'}</div></div>`;
+  const dz=document.getElementById('dz'),fi=document.getElementById('file-input');
   dz.addEventListener('click',()=>fi.click());
   dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('drag')});
   dz.addEventListener('dragleave',()=>dz.classList.remove('drag'));
@@ -259,52 +281,30 @@ function renderMedia(){
   fi.addEventListener('change',e=>{if(e.target.files.length)uploadFiles(e.target.files)});
 }
 async function uploadFiles(fileList){
-  const fd=new FormData();
-  for(const f of fileList) fd.append('files',f,f.name);
+  const fd=new FormData();for(const f of fileList) fd.append('files',f,f.name);
   document.getElementById('upload-status').innerHTML='⏳ Mengupload…';
-  const res=await fetch(`${API}/api/upload`,{method:'POST',body:fd});
-  const data=await res.json();
-  images=await(await fetch(`${API}/api/images`)).json();
-  document.getElementById('upload-status').innerHTML=`✅ ${data.files.length} file terupload`;
-  renderMedia();
-  renderUnits();
+  await fetch('/api/upload',{method:'POST',headers:{'X-Auth-Token':AUTH},body:fd});
+  images=await api('/api/images');
+  document.getElementById('upload-status').innerHTML=`✅ Terupload`;renderMedia();renderUnits();
 }
 async function delImg(name){
   if(!confirm(`Hapus ${name}?`))return;
-  await fetch(`${API}/api/images/${encodeURIComponent(name)}`,{method:'DELETE'});
-  images=await(await fetch(`${API}/api/images`)).json();
-  renderMedia();
+  await api(`/api/images/${encodeURIComponent(name)}`,{method:'DELETE'});
+  images=await api('/api/images');renderMedia();
 }
-
-init();
 
 // ── DEPLOY ──
 function getToken(){return localStorage.getItem('gh_token')||''}
-function setupToken(){
-  const t=prompt('GitHub Personal Access Token:',getToken());
-  if(t){localStorage.setItem('gh_token',t);document.getElementById('token-btn').textContent='🔑 Token ✓'}
-}
-if(getToken())document.getElementById('token-btn').textContent='🔑 Token ✓';
-
+function setupToken(){const t=prompt('GitHub Personal Access Token:',getToken());if(t){localStorage.setItem('gh_token',t);document.getElementById('token-btn').textContent='🔑 Token ✓'}}
 async function deployLive(){
-  const token=getToken();
-  if(!token){setupToken();return}
-  const btn=document.getElementById('deploy-btn');
-  const toast=document.getElementById('deploy-toast');
-  btn.disabled=true;btn.textContent='⏳ Deploying…';
-  toast.style.display='block';toast.innerHTML='⏳ Committing & deploying…';
+  const token=getToken();if(!token){setupToken();return}
+  const btn=document.getElementById('deploy-btn'),toast=document.getElementById('deploy-toast');
+  btn.disabled=true;btn.textContent='⏳ Deploying…';toast.style.display='block';toast.innerHTML='⏳ Committing & deploying…';
   try{
-    const res=await fetch(`${API}/api/deploy`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
-    const data=await res.json();
-    if(data.ok){
-      toast.innerHTML='✅ <strong>Deployed!</strong><br><small style="color:#aaa">Sudah live di paviliun900.com</small>';
-      setTimeout(()=>toast.style.display='none',5000);
-    }else{
-      toast.innerHTML=`❌ <strong>Gagal</strong><br><pre style="font-size:.7rem;max-height:150px;overflow:auto;color:#ff6b6b">${(data.log||[]).join('\n')}</pre>`;
-    }
-  }catch(e){
-    toast.innerHTML=`❌ Error: ${e.message}`;
-  }
+    const data=await api('/api/deploy',{method:'POST',body:JSON.stringify({token})});
+    if(data.ok){toast.innerHTML='✅ <strong>Deployed!</strong><br><small style="color:#aaa">Live di paviliun900.com</small>';setTimeout(()=>toast.style.display='none',5000)}
+    else{toast.innerHTML=`❌ <strong>Gagal</strong><br><pre style="font-size:.7rem;max-height:150px;overflow:auto;color:#ff6b6b">${(data.log||[]).join('\n')}</pre>`}
+  }catch(e){toast.innerHTML=`❌ ${e.message}`}
   btn.disabled=false;btn.textContent='🚀 Deploy ke Live';
 }
 </script>

@@ -7,7 +7,6 @@
       md="6"
       v-for="unit in sortedUnits"
       :key="unit.id"
-      style="margin: 0 0.5rem"
     >
       <v-carousel hide-delimiter-background cycle show-arrows="hover" height="280">
         <v-carousel-item
@@ -29,12 +28,16 @@
       </v-carousel>
 
       <div class="pa-3" @click="goDetail(unit)" style="cursor: pointer">
-        <p style="font-weight: 700" v-html="unit.fitur"></p>
+        <div class="fitur-badges mb-2">
+          <v-chip v-for="(f, i) in (unit.fitur || [])" :key="i" size="small" variant="outlined" class="mr-1 mb-1">
+            {{ f }}
+          </v-chip>
+        </div>
         <h2 style="font-weight: 500">{{ unit.judul }}</h2>
         <hr style="width: 50%" />
         <div class="mt-2">
           <p>{{ unit.desc }}</p>
-          <h3 style="color: #5c5c5c" class="mt-2">{{ unit.harga }}</h3>
+          <h3 style="color: #5c5c5c" class="mt-2">{{ formatHarga(unit.harga, unit.satuan) }}</h3>
         </div>
       </div>
     </v-col>
@@ -42,19 +45,18 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { formatHarga } from '@/utils/format'
 import unitsData from '@/data/units.json'
 
 const router = useRouter()
 
 const sortedUnits = computed(() => {
-  return [...unitsData].sort((a, b) => a.tag.toUpperCase().localeCompare(b.tag.toUpperCase()))
+  return [...unitsData].sort((a, b) => a.tag.localeCompare(b.tag))
 })
 
-function imgUrl(name) {
-  return `/img/units/${name}`
-}
+function imgUrl(name) { return `/img/units/${name}` }
 
 function goDetail(unit) {
   sessionStorage.setItem('unit', JSON.stringify(unit))
@@ -63,16 +65,8 @@ function goDetail(unit) {
 </script>
 
 <style scoped>
-.unit-card {
-  transition: ease-out 0.5s;
-}
-.unit-card:hover {
-  transform: scale(1.03);
-  box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-}
-@media only screen and (max-width: 960px) {
-  .unit-card {
-    margin: 0 !important;
-  }
-}
+.fitur-badges { display: flex; flex-wrap: wrap; }
+.unit-card { transition: ease-out 0.5s; }
+.unit-card:hover { transform: scale(1.03); box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px; }
+@media only screen and (max-width: 960px) { .unit-card { margin: 0 !important; } }
 </style>

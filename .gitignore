@@ -1,6 +1,8 @@
 .DS_Store
 node_modules
 /dist
+/scripts
+scripts/.auth.json
 
 # local env files
 .env.local
