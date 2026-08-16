@@ -100,7 +100,7 @@
   },
   {
     "id": 2,
-    "judul": "Exclusive and Strategic Apartment",
+    "judul": "A23 Exclusive and Strategic Apartment",
     "fitur": [
       "3 Bedrooms",
       "6 Guests",
@@ -113,11 +113,11 @@
     "tamu": "6",
     "tag": "Not Available",
     "gambar": [
-      "b21-LivingRoom.jpg",
       "b21-dapur.jpg",
-      "b21-masterBed.jpg",
       "b21-KMM.jpg",
-      "b21-Koridor.jpg"
+      "b21-Koridor.jpg",
+      "b21-LivingRoom.jpg",
+      "b21-masterBed.jpg"
     ],
     "fasilitas": [
       {
@@ -129,8 +129,7 @@
         "ikon": "teenyicons:bath-outline"
       },
       {
-        "nama": "Smart TV 32\"",
-        "ikon": "pixelarticons:device-tv-smart"
+        "nama": "Smart TV 32"
       },
       {
         "nama": "Kitchen",
@@ -191,7 +190,7 @@
     ],
     "desc": "The A21 Unit is a compact, modern home with 2 bedrooms and 2 bathrooms. Perfect for long-term living in the heart of Jogja at an affordable price.",
     "detail": "The A21 Unit is a compact, modern, and minimalistic space designed for long-term living in the center of Yogyakarta. With 2 bedrooms and 2 bathrooms, it's perfect for young professionals, couples, or small families looking for an affordable yet stylish home base in Jogja. Clean lines, smart layout, and a central location make daily life effortless — everything you need is just minutes away",
-    "harga": 0,
+    "harga": 38000000,
     "satuan": "tahun",
     "tamu": "4",
     "tag": "Not Available",
