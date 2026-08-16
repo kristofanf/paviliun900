@@ -95,6 +95,27 @@ app.delete('/api/images/:name', (req, res) => {
   res.json({ ok: true })
 })
 
+// --- DEPLOY API ---
+app.post('/api/deploy', async (req, res) => {
+  const { execSync } = await import('node:child_process')
+  const opts = { cwd: ROOT, encoding: 'utf-8', timeout: 120000 }
+  const log = []
+  try {
+    log.push(execSync('git add -A', opts) || 'git add OK')
+    log.push(execSync('git commit -m "CMS update via admin panel"', opts) || 'git commit OK')
+    log.push(execSync('git push origin master', opts) || 'git push master OK')
+    const token = req.body?.token
+    if (token) {
+      log.push(execSync(`GITHUB_TOKEN="${token}" npm run deploy`, { ...opts, timeout: 180000 }) || 'deploy OK')
+    }
+    res.json({ ok: true, log })
+  } catch (e) {
+    const msg = e.stdout || e.stderr || e.message
+    log.push(msg)
+    res.json({ ok: false, log, error: msg })
+  }
+})
+
 app.listen(PORT, () => {
   console.log(`\n  ╔══════════════════════════════════╗`)
   console.log(`  ║   Paviliun 900 CMS Admin         ║`)

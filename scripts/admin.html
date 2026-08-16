@@ -60,7 +60,12 @@ textarea{min-height:80px;resize:vertical}
     <a href="#" data-page="homepage">Homepage</a>
     <a href="#" data-page="media">Media</a>
   </nav>
+  <div style="margin-left:auto;display:flex;align-items:center;gap:.5rem">
+    <button class="btn btn-sm" onclick="setupToken()" style="color:#fff;border-color:rgba(255,255,255,.3);background:transparent;font-size:.75rem" id="token-btn">🔑 Setup Token</button>
+    <button class="btn btn-sm" onclick="deployLive()" style="background:#25D366;color:#fff;border-color:#25D366" id="deploy-btn">🚀 Deploy ke Live</button>
+  </div>
 </div>
+<div id="deploy-toast" style="display:none;position:fixed;top:70px;right:20px;background:#111;color:#fff;padding:1rem 1.5rem;border-radius:10px;z-index:999;max-width:400px;font-size:.85rem;box-shadow:0 4px 20px rgba(0,0,0,.3)"></div>
 <div class="container">
   <div id="page-units" class="page active"></div>
   <div id="page-homepage" class="page"></div>
@@ -273,6 +278,36 @@ async function delImg(name){
 }
 
 init();
+
+// ── DEPLOY ──
+function getToken(){return localStorage.getItem('gh_token')||''}
+function setupToken(){
+  const t=prompt('GitHub Personal Access Token:',getToken());
+  if(t){localStorage.setItem('gh_token',t);document.getElementById('token-btn').textContent='🔑 Token ✓'}
+}
+if(getToken())document.getElementById('token-btn').textContent='🔑 Token ✓';
+
+async function deployLive(){
+  const token=getToken();
+  if(!token){setupToken();return}
+  const btn=document.getElementById('deploy-btn');
+  const toast=document.getElementById('deploy-toast');
+  btn.disabled=true;btn.textContent='⏳ Deploying…';
+  toast.style.display='block';toast.innerHTML='⏳ Committing & deploying…';
+  try{
+    const res=await fetch(`${API}/api/deploy`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token})});
+    const data=await res.json();
+    if(data.ok){
+      toast.innerHTML='✅ <strong>Deployed!</strong><br><small style="color:#aaa">Sudah live di paviliun900.com</small>';
+      setTimeout(()=>toast.style.display='none',5000);
+    }else{
+      toast.innerHTML=`❌ <strong>Gagal</strong><br><pre style="font-size:.7rem;max-height:150px;overflow:auto;color:#ff6b6b">${(data.log||[]).join('\n')}</pre>`;
+    }
+  }catch(e){
+    toast.innerHTML=`❌ Error: ${e.message}`;
+  }
+  btn.disabled=false;btn.textContent='🚀 Deploy ke Live';
+}
 </script>
 </body>
 </html>
