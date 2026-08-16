@@ -182,5 +182,66 @@
         "ikon": "la:whatsapp"
       }
     ]
+  },
+  {
+    "judul": "A21 Unit Compact & Modern",
+    "fitur": [
+      "2 Bedrooms",
+      "2 Bathrooms"
+    ],
+    "desc": "The A21 Unit is a compact, modern home with 2 bedrooms and 2 bathrooms. Perfect for long-term living in the heart of Jogja at an affordable price.",
+    "detail": "The A21 Unit is a compact, modern, and minimalistic space designed for long-term living in the center of Yogyakarta. With 2 bedrooms and 2 bathrooms, it's perfect for young professionals, couples, or small families looking for an affordable yet stylish home base in Jogja. Clean lines, smart layout, and a central location make daily life effortless — everything you need is just minutes away",
+    "harga": 0,
+    "satuan": "tahun",
+    "tamu": "4",
+    "tag": "Not Available",
+    "gambar": [
+      "WhatsApp_Image_2026-08-16_at_17.04.37.jpeg",
+      "WhatsApp_Image_2026-08-16_at_17.04.37__1_.jpeg",
+      "WhatsApp_Image_2026-08-16_at_17.04.37__2_.jpeg",
+      "WhatsApp_Image_2026-08-16_at_17.04.38.jpeg",
+      "WhatsApp_Image_2026-08-16_at_17.04.38__1_.jpeg",
+      "WhatsApp_Image_2026-08-16_at_17.04.38__2_.jpeg",
+      "WhatsApp_Image_2026-08-16_at_17.04.38__3_.jpeg",
+      "WhatsApp_Image_2026-08-16_at_17.04.39.jpeg",
+      "WhatsApp_Image_2026-08-16_at_17.04.39__1_.jpeg",
+      "WhatsApp_Image_2026-08-16_at_17.04.39__2_.jpeg"
+    ],
+    "fasilitas": [
+      {
+        "nama": "Wifi",
+        "ikon": "iconoir:wifi"
+      },
+      {
+        "nama": "Kitchen",
+        "ikon": "fa6-solid:kitchen-set"
+      },
+      {
+        "nama": "Air Conditioning",
+        "ikon": "tabler:air-conditioning"
+      },
+      {
+        "nama": "Water Heater",
+        "ikon": "material-symbols:water-heater-outline"
+      },
+      {
+        "nama": "Refrigerator",
+        "ikon": "ep:refrigerator"
+      }
+    ],
+    "rules": [
+      {
+        "aturan": "No Smoking",
+        "ikon": "mdi:no-smoking"
+      }
+    ],
+    "order": [
+      {
+        "detail": "Whatsapp",
+        "link": "https://wa.me/6285888815722?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900",
+        "ikon": "la:whatsapp"
+      }
+    ],
+    "id": 1786877015037
   }
 ]

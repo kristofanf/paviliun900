@@ -147,16 +147,16 @@ function fmtInput(n){ return n ? String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.')
 function unfmtInput(s){ return parseInt((s||'').replace(/\./g,''),10)||0 }
 function bindPrice(el, val){
   el.value=fmtInput(val);
+  el.setAttribute('data-raw',val||0);
   el.addEventListener('input',e=>{
     const pos=e.target.selectionStart;
     const prev=el.value;
     const raw=prev.replace(/\D/g,'');
     el.value=fmtInput(raw);
+    el.setAttribute('data-raw', raw||'0');
     const diff=el.value.length-prev.length;
     el.setSelectionRange(pos+diff,pos+diff);
   });
-  el.setAttribute('data-raw',val||0);
-  return el;
 }
 function getRawPrice(){return parseInt(document.getElementById('fu-harga')?.getAttribute('data-raw')||'0',10)}
 
@@ -218,20 +218,79 @@ function renderUnits(){
     h+=`<div class="unit-row"><div style="display:flex;align-items:center;gap:1rem">
       ${img0?`<img src="/img/units/${img0}" class="preview-img">`:''}
       <div class="unit-info"><strong>${u.judul}</strong> ${tag}<br><small>${price} · ${u.tamu} tamu · ${(u.gambar||[]).length} foto</small></div></div>
-      <div class="actions"><button class="btn btn-sm" onclick="editUnit(${u.id})">Edit</button><button class="btn btn-sm btn-danger" onclick="delUnit(${u.id})">Hapus</button></div></div>`;
+      <div class="actions"><button class="btn btn-sm" onclick="copyUnit(${u.id})" title="Duplikat">📋</button><button class="btn btn-sm" onclick="editUnit(${u.id})">Edit</button><button class="btn btn-sm btn-danger" onclick="delUnit(${u.id})">Hapus</button></div></div>`;
   });
   el.innerHTML=h+'</div>';
+}
+
+// ── COMMON ICONS LIBRARY ──
+const KNOWN_FAC=[
+  {n:'4 Bedrooms',i:'mdi:bed-outline'},{n:'3 Bedrooms',i:'mdi:bed-outline'},{n:'2 Bedrooms',i:'mdi:bed-outline'},
+  {n:'2 Bathrooms',i:'teenyicons:bath-outline'},{n:'1 Bathroom',i:'teenyicons:bath-outline'},
+  {n:'Smart TV',i:'pixelarticons:device-tv-smart'},{n:'Kitchen',i:'fa6-solid:kitchen-set'},
+  {n:'Wifi',i:'iconoir:wifi'},{n:'Air Conditioning',i:'tabler:air-conditioning'},
+  {n:'Free Washer',i:'fluent:washer-24-regular'},{n:'Free Parking',i:'ph:car'},
+  {n:'Water Heater',i:'material-symbols:water-heater-outline'},{n:'Refrigerator',i:'ep:refrigerator'},
+  {n:'Microwave',i:'material-symbols:microwave-outline'},{n:'Balcony',i:'mdi:balcony'},
+  {n:'Swimming Pool',i:'mdi:pool'},{n:'Garden',i:'mdi:flower'},
+];
+const KNOWN_RULES=[
+  {n:'No Smoking',i:'mdi:no-smoking'},{n:'No Pets',i:'mdi:paw-off-outline'},
+  {n:'No Parties',i:'mdi:party-popper'},{n:'No Shoes',i:'mdi:shoe-sneaker-off'},
+  {n:'Quiet Hours 10PM-7AM',i:'mdi:volume-off'},
+  {n:'Check-in: 2:00 PM',i:'icon-park-outline:check-in'},{n:'Checkout: 12:00 PM',i:'ri:time-line'},
+  {n:'8 guests maximum',i:'fluent:people-20-regular'},{n:'6 guests maximum',i:'fluent:people-20-regular'},
+];
+
+function renderIconPreview(ikon){return `<iconify-icon icon="${ikon}" width="16" height="16" style="vertical-align:middle"></iconify-icon>`}
+
+async function pickFromList(title, items, selectedKeys) {
+  const body = items.map(it => {
+    const checked = selectedKeys.has(it.n+it.i) ? 'checked' : '';
+    return `<label style="display:flex;align-items:center;gap:.5rem;padding:.3rem .4rem;cursor:pointer;border-radius:6px;transition:background .15s" onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''">
+      <input type="checkbox" data-pick value="${esc(it.n)}||${esc(it.i)}" ${checked}>
+      ${renderIconPreview(it.i)} <span style="font-size:.85rem">${it.n}</span>
+    </label>`;
+  }).join('');
+  return modalShow(title, `<div style="max-height:300px;overflow-y:auto">${body}</div>`, {okText:'Pilih', confirm:true})
+    .then(ok => ok ? [...document.querySelectorAll('input[data-pick]:checked')].map(c => c.value) : null);
+}
+
+function copyUnit(id){
+  const src=units.find(x=>x.id===id);
+  if(!src)return;
+  const clone={...src, id:0, judul:src.judul+' (Copy)', gambar:[...src.gambar], fitur:[...src.fitur], fasilitas:src.fasilitas.map(f=>({...f})), rules:src.rules.map(r=>({...r}))};
+  editUnit(0);
+  // Pre-fill form with cloned data after render
+  setTimeout(()=>{
+    document.getElementById('fu-judul').value=clone.judul;
+    document.getElementById('fu-satuan').value=clone.satuan||'malam';
+    document.getElementById('fu-tamu').value=clone.tamu;
+    document.getElementById('fu-tag').value=clone.tag;
+    document.getElementById('fu-desc').value=clone.desc||'';
+    document.getElementById('fu-detail').value=clone.detail||'';
+    bindPrice(document.getElementById('fu-harga'), clone.harga||0);
+    // Re-check gambar checkboxes
+    document.querySelectorAll('input[name=imgs]').forEach(c=>{c.checked=(clone.gambar||[]).includes(c.value)});
+    // Re-render fitur/fasilitas/rules
+    document.getElementById('fitur-list').innerHTML=(clone.fitur||[]).map(f=>`<span class="chip">${esc(f)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fit value="${esc(f)}"></span>`).join('');
+    document.getElementById('fac-list').innerHTML=(clone.fasilitas||[]).map(f=>`<span class="chip">${renderIconPreview(f.ikon)} ${f.nama} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${f.nama}||${f.ikon}"></span>`).join('');
+    document.getElementById('rule-list').innerHTML=(clone.rules||[]).map(r=>`<span class="chip">${renderIconPreview(r.ikon)} ${r.aturan} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rn data-ri value="${r.aturan}||${r.ikon}"></span>`).join('');
+  },50);
 }
 
 function editUnit(id){
   const u=id?units.find(x=>x.id===id):{id:0,judul:'',fitur:[],desc:'',detail:'',harga:0,satuan:'malam',tamu:'',tag:'Available',gambar:[],fasilitas:[],rules:[],order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}`,ikon:'la:whatsapp'}]};
   const imgChecks=images.map(f=>`<label><input type="checkbox" name="imgs" value="${f}" ${(u.gambar||[]).includes(f)?'checked':''}><img src="/img/units/${f}"></label>`).join('');
   const fiturChips=(u.fitur||[]).map(f=>`<span class="chip">${esc(f)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fit value="${esc(f)}"></span>`).join('');
-  const facs=(u.fasilitas||[]).map(f=>`<span class="chip">${f.nama} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${f.nama}||${f.ikon}"></span>`).join('');
-  const rls=(u.rules||[]).map(r=>`<span class="chip">${r.aturan} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rn data-ri value="${r.aturan}||${r.ikon}"></span>`).join('');
+  const facs=(u.fasilitas||[]).map(f=>`<span class="chip">${renderIconPreview(f.ikon)} ${f.nama} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${f.nama}||${f.ikon}"></span>`).join('');
+  const rls=(u.rules||[]).map(r=>`<span class="chip">${renderIconPreview(r.ikon)} ${r.aturan} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rn data-ri value="${r.aturan}||${r.ikon}"></span>`).join('');
 
   document.getElementById('page-units').innerHTML=`<div class="card">
-    <h2>${id?'Edit':'Tambah'} Unit</h2>
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
+      <button class="btn btn-sm" onclick="renderUnits()" style="flex:none">← Kembali</button>
+      <h2 style="margin:0">${id?'Edit':'Tambah'} Unit</h2>
+    </div>
     <div class="field"><label>Judul</label><input id="fu-judul" value="${esc(u.judul)}"></div>
     <div class="row"><div class="field"><label>Harga (Rp)</label><input id="fu-harga" type="text" inputmode="numeric" placeholder="1.000.000" style="font-variant-numeric:tabular-nums"></div>
     <div class="field"><label>Satuan</label><select id="fu-satuan"><option value="malam" ${u.satuan==='malam'?'selected':''}>/malam</option><option value="tahun" ${u.satuan==='tahun'?'selected':''}>/tahun</option><option value="bulan" ${u.satuan==='bulan'?'selected':''}>/bulan</option></select></div>
@@ -244,9 +303,9 @@ function editUnit(id){
     <div class="section-title">Foto Unit</div>
     <div style="margin-bottom:.75rem"><label class="btn btn-sm" style="cursor:pointer">📁 Upload Foto Baru<input type="file" id="fu-upload-input" multiple accept="image/*" style="display:none"></label></div>
     <div class="img-grid">${imgChecks||'<p style="color:var(--muted)">Upload foto atau pilih dari Media Library</p>'}</div>
-    <div class="section-title">Fasilitas <button class="btn btn-sm" onclick="addChip('fac')">+ Tambah</button></div>
+    <div class="section-title">Fasilitas <button class="btn btn-sm" onclick="pickFac()">+ Pilih / Tambah</button></div>
     <div id="fac-list">${facs}</div>
-    <div class="section-title">House Rules <button class="btn btn-sm" onclick="addChip('rule')">+ Tambah</button></div>
+    <div class="section-title">House Rules <button class="btn btn-sm" onclick="pickRule()">+ Pilih / Tambah</button></div>
     <div id="rule-list">${rls}</div>
     <div style="margin-top:1.5rem;display:flex;gap:.5rem">
       <button class="btn btn-accent" onclick="saveUnit(${id})">Simpan</button>
@@ -254,7 +313,7 @@ function editUnit(id){
     </div></div>`;
   // Bind price formatter
   bindPrice(document.getElementById('fu-harga'), u.harga||0);
-  // Upload handler for inline upload
+  // Upload handler
   const iu=document.getElementById('fu-upload-input');
   if(iu) iu.addEventListener('change',async e=>{
     if(!e.target.files.length)return;
@@ -263,16 +322,50 @@ function editUnit(id){
     images=await api('/api/images');
     editUnit(id);
   });
+  // Inject iconify script if not loaded
+  if(!document.querySelector('script[src*="iconify"]')){
+    const s=document.createElement('script');s.src='https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js';document.head.appendChild(s);
+  }
 }
 
 async function addFitur(){
   const n=await mPrompt('Tambah Fitur','contoh: 4 Bedrooms'); if(!n)return;
   document.getElementById('fitur-list').innerHTML+=`<span class="chip">${esc(n)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fit value="${esc(n)}"></span>`;
 }
-async function addChip(type){
-  const n=await mPrompt(type==='fac'?'Nama Fasilitas':'Rule','contoh: '+(type==='fac'?'Wifi':'No Smoking')); if(!n)return;
-  const i=await mPrompt('Icon (iconify)',type==='fac'?'mdi:bed-outline':'mdi:no-smoking'); if(!i)return;
-  document.getElementById(type==='fac'?'fac-list':'rule-list').innerHTML+=`<span class="chip">${n} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-${type==='fac'?'fn':'rn'} data-${type==='fac'?'fi':'ri'} value="${n}||${i}"></span>`;
+
+function getSelectedKeys(listId){
+  const s=new Set();
+  document.querySelectorAll(`#${listId} input`).forEach(h=>s.add(h.value));
+  return s;
+}
+function renderChips(listId, items, tag1, tag2){
+  document.getElementById(listId).innerHTML=items.map(v=>{
+    const[n,i]=v.split('||');
+    return `<span class="chip">${renderIconPreview(i)} ${n} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-${tag1}n data-${tag1}i value="${n}||${i}"></span>`;
+  }).join('');
+}
+async function pickFac(){
+  const sel=getSelectedKeys('fac-list');
+  const picked=await pickFromList('Pilih Fasilitas', KNOWN_FAC, sel);
+  if(picked===null)return; // cancelled
+  // Also allow manual add
+  const n=await mPrompt('Atau tambah manual','Nama fasilitas (kosongkan jika sudah cukup)');
+  if(n){
+    const i=await mPrompt('Icon (iconify)','mdi:bed-outline');
+    if(i) picked.push(`${n}||${i}`);
+  }
+  renderChips('fac-list', picked, 'f', 'f');
+}
+async function pickRule(){
+  const sel=getSelectedKeys('rule-list');
+  const picked=await pickFromList('Pilih House Rules', KNOWN_RULES, sel);
+  if(picked===null)return;
+  const n=await mPrompt('Atau tambah manual','Rule (kosongkan jika sudah cukup)');
+  if(n){
+    const i=await mPrompt('Icon (iconify)','mdi:no-smoking');
+    if(i) picked.push(`${n}||${i}`);
+  }
+  renderChips('rule-list', picked, 'r', 'r');
 }
 
 async function saveUnit(id){
