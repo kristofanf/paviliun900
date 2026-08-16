@@ -4,7 +4,7 @@
       <v-container>
         <v-btn @click="router.replace({ name: 'detail' })" class="mb-3" elevation="1" color="black">
           <v-icon start icon="mdi-arrow-left" />
-          Kembali
+          Back
         </v-btn>
         <v-row>
           <v-col

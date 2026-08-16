@@ -5,7 +5,7 @@
       <v-container fluid>
         <v-btn @click="router.replace({ name: 'home' })" variant="text" color="black" class="mb-4 back-btn">
           <v-icon start icon="mdi-arrow-left" />
-          Kembali
+          Back
         </v-btn>
 
         <h1 class="detail-title">{{ detailUnit.judul }}</h1>
