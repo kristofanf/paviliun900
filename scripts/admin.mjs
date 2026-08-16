@@ -3,6 +3,7 @@ import multer from 'multer'
 import { readFileSync, writeFileSync, existsSync, readdirSync, unlinkSync, mkdirSync } from 'node:fs'
 import { join, resolve, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { execSync } from 'node:child_process'
 
 const __dirname = fileURLToPath(new URL('.', import.meta.url))
 const ROOT = resolve(__dirname, '..')
@@ -96,24 +97,33 @@ app.delete('/api/images/:name', (req, res) => {
 })
 
 // --- DEPLOY API ---
-app.post('/api/deploy', async (req, res) => {
-  const { execSync } = await import('node:child_process')
-  const opts = { cwd: ROOT, encoding: 'utf-8', timeout: 120000 }
+const SHELL = process.platform === 'win32' ? 'C:/Program Files/Git/bin/bash.exe' : '/bin/bash'
+const execOpts = { cwd: ROOT, encoding: 'utf-8', shell: SHELL, timeout: 180000 }
+
+function run(cmd) {
+  try { return execSync(cmd, execOpts).trim() || 'OK' }
+  catch (e) { return e.stdout?.trim() || e.stderr?.trim() || e.message }
+}
+
+app.post('/api/deploy', (req, res) => {
   const log = []
-  try {
-    log.push(execSync('git add -A', opts) || 'git add OK')
-    log.push(execSync('git commit -m "CMS update via admin panel"', opts) || 'git commit OK')
-    log.push(execSync('git push origin master', opts) || 'git push master OK')
-    const token = req.body?.token
-    if (token) {
-      log.push(execSync(`GITHUB_TOKEN="${token}" npm run deploy`, { ...opts, timeout: 180000 }) || 'deploy OK')
-    }
-    res.json({ ok: true, log })
-  } catch (e) {
-    const msg = e.stdout || e.stderr || e.message
-    log.push(msg)
-    res.json({ ok: false, log, error: msg })
+  log.push(run('git add -A'))
+
+  const commitOut = run('git commit -m "CMS update via admin panel"')
+  log.push(commitOut)
+
+  if (commitOut.includes('nothing to commit')) {
+    return res.json({ ok: true, log: [...log, 'No changes to deploy'] })
   }
+
+  log.push(run('git push origin master'))
+
+  const token = req.body?.token
+  if (token) {
+    log.push(run(`GITHUB_TOKEN="${token}" npm run deploy`))
+  }
+
+  res.json({ ok: true, log })
 })
 
 app.listen(PORT, () => {
