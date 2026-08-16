@@ -232,9 +232,9 @@ function renderUnits(){
 }
 
 // ── TIERED PRICING ──
-const SATUAN_OPTS=['malam','3 bulan','6 bulan','tahun','bulan'];
+const SATUAN_OPTS=['night','month','3 months','6 months','year'];
 function renderTiers(tiers){
-  if(!tiers||!tiers.length) tiers=[{amount:0,satuan:'malam'}];
+  if(!tiers||!tiers.length) tiers=[{amount:0,satuan:'night'}];
   return tiers.map((t,i)=>`<div class="tier-row" style="display:flex;gap:.5rem;align-items:flex-end;margin-bottom:.5rem">
     <div style="flex:1"><label>${i===0?'Harga':'Harga'} (Rp)</label><input class="tier-amount" type="text" inputmode="numeric" data-raw="${t.amount||0}" placeholder="1.000.000" style="font-variant-numeric:tabular-nums"></div>
     <div style="width:140px"><label>Satuan</label><select class="tier-satuan">${SATUAN_OPTS.map(s=>`<option value="${s}" ${s===t.satuan?'selected':''}>/${s}</option>`).join('')}</select></div>

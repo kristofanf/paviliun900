@@ -13,7 +13,7 @@
     "harga": [
       {
         "amount": 1100000,
-        "satuan": "malam"
+        "satuan": "night"
       }
     ],
     "tamu": "8",
@@ -116,15 +116,15 @@
     "harga": [
       {
         "amount": 50000000,
-        "satuan": "tahun"
+        "satuan": "year"
       },
       {
         "amount": 26000000,
-        "satuan": "6 bulan"
+        "satuan": "6 months"
       },
       {
         "amount": 15000000,
-        "satuan": "3 bulan"
+        "satuan": "3 months"
       }
     ],
     "tamu": "6",
@@ -209,15 +209,15 @@
     "harga": [
       {
         "amount": 38000000,
-        "satuan": "tahun"
+        "satuan": "year"
       },
       {
         "amount": 20000000,
-        "satuan": "6 bulan"
+        "satuan": "6 months"
       },
       {
         "amount": 12000000,
-        "satuan": "3 bulan"
+        "satuan": "3 months"
       }
     ],
     "tamu": "4",
