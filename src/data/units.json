@@ -208,12 +208,12 @@
     ],
     "fasilitas": [
       {
-        "nama": "Wifi",
-        "ikon": "iconoir:wifi"
-      },
-      {
         "nama": "Kitchen",
         "ikon": "fa6-solid:kitchen-set"
+      },
+      {
+        "nama": "Wifi",
+        "ikon": "iconoir:wifi"
       },
       {
         "nama": "Air Conditioning",
@@ -226,6 +226,10 @@
       {
         "nama": "Refrigerator",
         "ikon": "ep:refrigerator"
+      },
+      {
+        "nama": "Washer",
+        "ikon": "fluent:washer-24-regular"
       }
     ],
     "rules": [
