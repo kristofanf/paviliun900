@@ -30,7 +30,6 @@ const contacts = computed(() => [
   { icon: 'la:whatsapp', label: `+${settings.site.whatsapp}`, link: `https://wa.me/${settings.site.whatsapp}?text=Halo%20saya%20mau%20info%20lebih%20lanjut%20tentang%20Paviliun900` },
   { icon: 'mdi-light:email', label: settings.site.email, link: `mailto:${settings.site.email}?subject=Informasi Paviliun900` },
   { icon: 'fa-brands:airbnb', label: 'Airbnb Paviliun 900', link: settings.site.airbnbUrl },
-  { icon: 'cil:building', label: 'Lamudi Paviliun 900', link: settings.site.lamudiUrl },
 ])
 </script>
 

@@ -181,8 +181,7 @@ function renderHomepage(){
       <div class="row"><div class="field"><label>Nama Situs</label><input id="hs-name" value="${esc(s.site?.name)}"></div>
       <div class="field"><label>WhatsApp (no kode negara)</label><input id="hs-wa" value="${esc(s.site?.whatsapp)}"></div></div>
       <div class="row"><div class="field"><label>Email</label><input id="hs-email" value="${esc(s.site?.email)}"></div>
-      <div class="field"><label>Airbnb URL</label><input id="hs-airbnb" value="${esc(s.site?.airbnbUrl)}"></div>
-      <div class="field"><label>Lamudi URL</label><input id="hs-lamudi" value="${esc(s.site?.lamudiUrl)}"></div></div>
+      <div class="field"><label>Airbnb URL</label><input id="hs-airbnb" value="${esc(s.site?.airbnbUrl)}"></div></div>
     </div>
     <div class="card"><h2>🏠 Hero Section</h2>
       <div class="field"><label>Judul</label><input id="hh-title" value="${esc(s.hero?.title)}"></div>
@@ -220,7 +219,7 @@ function addReview(){
 }
 async function saveSettings(){
   const s={
-    site:{name:v('hs-name'),whatsapp:v('hs-wa'),email:v('hs-email'),airbnbUrl:v('hs-airbnb'),lamudiUrl:v('hs-lamudi')},
+    site:{name:v('hs-name'),whatsapp:v('hs-wa'),email:v('hs-email'),airbnbUrl:v('hs-airbnb')},
     hero:{title:v('hh-title'),subtitle:v('hh-sub'),coverImage:v('hh-img')},
     about:{text:v('ha-text'),image:v('ha-img')},
     location:{address:v('hl-addr'),mapEmbed:v('hl-map'),nearby:[...document.querySelectorAll('#hl-nearby .chip')].map(c=>c.childNodes[0].textContent.trim())},
