@@ -32,16 +32,36 @@
     ]
   },
   "reviews": [
-    { "text": "\"Comfy place to stay, Fair rate!\"", "author": "Agung Nugroho" },
-    { "text": "\"Mewah, aman, nyaman, tenang..great place to stay\"", "author": "Michel Aaron" },
-    { "text": "\"Tempat tinggal yang nyaman, aman dan lokasi yang strategis\"", "author": "Agus Soelistiono" },
-    { "text": "\"Best airbnb in jogja so far. good location, spacious and clean. very recommended.\"", "author": "Tegar" },
-    { "text": "\"Worth every penny that I paid, the place is very clean, spacy living room and bedrooms.\"", "author": "Yodivan" },
-    { "text": "\"We felt right at home, the place is quiet so we could sleep well. Very clean and comfortable.\"", "author": "Lydia" }
+    {
+      "text": "\"Comfy place to stay, Fair rate!\"",
+      "author": "Agung Nugroho"
+    },
+    {
+      "text": "\"Mewah, aman, nyaman, tenang..great place to stay\"",
+      "author": "Michel Aaron"
+    },
+    {
+      "text": "\"Tempat tinggal yang nyaman, aman dan lokasi yang strategis\"",
+      "author": "Agus Soelistiono"
+    },
+    {
+      "text": "\"Best airbnb in jogja so far. good location, spacious and clean. very recommended.\"",
+      "author": "Tegar"
+    },
+    {
+      "text": "\"Worth every penny that I paid, the place is very clean, spacy living room and bedrooms.\"",
+      "author": "Yodivan"
+    },
+    {
+      "text": "\"We felt right at home, the place is quiet so we could sleep well. Very clean and comfortable.\"",
+      "author": "Lydia"
+    }
   ],
   "footer": {
     "warning": "Hati-hati penipuan dengan menggunakan foto Paviliun 900. Kontak resmi kami hanya yang tertera pada website Paviliun 900. Kami tidak bertanggung jawab atas akun lain yang mengatasnamakan Paviliun 900."
   },
-  "customFasilitas": [],
+  "customFasilitas": [
+    "Washer||fluent:washer-24-regular"
+  ],
   "customRules": []
 }
