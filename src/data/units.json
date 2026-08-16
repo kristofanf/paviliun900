@@ -208,6 +208,14 @@
     ],
     "fasilitas": [
       {
+        "nama": "2 Bedrooms",
+        "ikon": "mdi:bed-outline"
+      },
+      {
+        "nama": "2 Bathrooms",
+        "ikon": "teenyicons:bath-outline"
+      },
+      {
         "nama": "Kitchen",
         "ikon": "fa6-solid:kitchen-set"
       },
