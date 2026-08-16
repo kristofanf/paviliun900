@@ -37,7 +37,14 @@
         <hr style="width: 50%" />
         <div class="mt-2">
           <p>{{ unit.desc }}</p>
-          <h3 style="color: #5c5c5c" class="mt-2">{{ formatHarga(unit.harga, unit.satuan) }}</h3>
+          <h3 style="color: #5c5c5c" class="mt-2">
+            <template v-if="(unit.harga || []).length > 1">
+              Mulai dari {{ hargaMulaiDari(unit.harga) }}
+            </template>
+            <template v-else>
+              {{ formatHarga(unit.harga?.[0]?.amount, unit.harga?.[0]?.satuan) }}
+            </template>
+          </h3>
         </div>
       </div>
     </v-col>
@@ -47,7 +54,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { formatHarga } from '@/utils/format'
+import { formatHarga, hargaMulaiDari } from '@/utils/format'
 import unitsData from '@/data/units.json'
 
 const router = useRouter()

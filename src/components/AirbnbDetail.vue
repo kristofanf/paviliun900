@@ -15,8 +15,27 @@
           </v-chip>
         </div>
         <h3 class="detail-price">
-          {{ detailUnit.tamu }} Guests · {{ formatHarga(detailUnit.harga, detailUnit.satuan) }}
+          {{ detailUnit.tamu }} Guests
         </h3>
+
+        <!-- Pricing Tiers -->
+        <div class="pricing-section mt-4">
+          <div class="pricing-table">
+            <div
+              v-for="(tier, i) in (detailUnit.harga || [])"
+              :key="i"
+              class="pricing-row"
+              :class="{ 'pricing-best': i === 0 && detailUnit.harga.length > 1 }"
+            >
+              <span class="pricing-label">
+                <template v-if="i === 0 && detailUnit.harga.length > 1">Best Value</template>
+                <template v-else>{{ tier.satuan }}</template>
+              </span>
+              <span class="pricing-amount">{{ formatRupiah(tier.amount) }}</span>
+              <span class="pricing-unit">/{{ tier.satuan }}</span>
+            </div>
+          </div>
+        </div>
 
         <v-row class="mt-6">
           <v-col cols="12" lg="8" md="8">
@@ -134,7 +153,7 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
-import { formatHarga } from '@/utils/format'
+import { formatHarga, formatRupiah } from '@/utils/format'
 
 const router = useRouter()
 const detailUnit = ref(null)
@@ -337,6 +356,58 @@ onBeforeUnmount(() => {
   font-size: .8rem;
   color: #999;
   margin-top: 0.5rem;
+}
+
+/* ── Pricing ── */
+.pricing-table {
+  max-width: 380px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e8e8e8;
+}
+.pricing-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: #fafafa;
+  border-bottom: 1px solid #eee;
+}
+.pricing-row:last-child { border-bottom: none; }
+.pricing-label {
+  font-size: .85rem;
+  color: #666;
+  min-width: 80px;
+}
+.pricing-amount {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #111;
+  flex: 1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.pricing-unit {
+  font-size: .8rem;
+  color: #999;
+}
+.pricing-best {
+  background: #111;
+  color: #fff;
+}
+.pricing-best .pricing-label {
+  color: #25D366;
+  font-weight: 600;
+  font-size: .75rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.pricing-best .pricing-amount {
+  color: #fff;
+}
+.pricing-best .pricing-unit {
+  color: rgba(255,255,255,.5);
 }
 
 /* ── Responsive ── */

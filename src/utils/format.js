@@ -7,8 +7,18 @@ export function formatRupiah(num) {
 }
 
 /**
- * Format harga lengkap: {harga, satuan} → "Rp 1.000.000/malam"
+ * Format harga tunggal: {amount, satuan} → "Rp 1.000.000/malam"
  */
-export function formatHarga(harga, satuan) {
-  return formatRupiah(harga) + (satuan ? `/${satuan}` : '')
+export function formatHarga(amount, satuan) {
+  return formatRupiah(amount) + (satuan ? `/${satuan}` : '')
+}
+
+/**
+ * Harga terendah dari array tiers: [{amount,satuan}] → "Rp 1.000.000"
+ * Digunakan di card list
+ */
+export function hargaMulaiDari(tiers) {
+  if (!Array.isArray(tiers) || !tiers.length) return '-'
+  const min = Math.min(...tiers.map(t => t.amount))
+  return formatRupiah(min)
 }

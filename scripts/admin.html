@@ -222,13 +222,46 @@ function renderUnits(){
   sorted.forEach(u=>{
     const tag=u.tag==='Available'?'<span class="tag tag-avail">Available</span>':'<span class="tag tag-na">Not Available</span>';
     const img0=(u.gambar||[])[0];
-    const price=fmtRp(u.harga)+(u.satuan?`/${u.satuan}`:'');
+    const price=u.harga?.length>1?`Mulai dari ${fmtRp(Math.min(...u.harga.map(t=>t.amount)))}`:fmtRp(u.harga?.[0]?.amount)+(u.harga?.[0]?.satuan?`/${u.harga[0].satuan}`:'');
     h+=`<div class="unit-row"><div style="display:flex;align-items:center;gap:1rem">
       ${img0?`<img src="/img/units/${img0}" class="preview-img">`:''}
       <div class="unit-info"><strong>${u.judul}</strong> ${tag}<br><small>${price} · ${u.tamu} tamu · ${(u.gambar||[]).length} foto</small></div></div>
       <div class="actions"><button class="btn btn-sm" onclick="copyUnit(${u.id})" title="Duplikat">📋</button><button class="btn btn-sm" onclick="editUnit(${u.id})">Edit</button><button class="btn btn-sm btn-danger" onclick="delUnit(${u.id})">Hapus</button></div></div>`;
   });
   el.innerHTML=h+'</div>';
+}
+
+// ── TIERED PRICING ──
+const SATUAN_OPTS=['malam','3 bulan','6 bulan','tahun','bulan'];
+function renderTiers(tiers){
+  if(!tiers||!tiers.length) tiers=[{amount:0,satuan:'malam'}];
+  return tiers.map((t,i)=>`<div class="tier-row" style="display:flex;gap:.5rem;align-items:flex-end;margin-bottom:.5rem">
+    <div style="flex:1"><label>${i===0?'Harga':'Harga'} (Rp)</label><input class="tier-amount" type="text" inputmode="numeric" data-raw="${t.amount||0}" placeholder="1.000.000" style="font-variant-numeric:tabular-nums"></div>
+    <div style="width:140px"><label>Satuan</label><select class="tier-satuan">${SATUAN_OPTS.map(s=>`<option value="${s}" ${s===t.satuan?'selected':''}>/${s}</option>`).join('')}</select></div>
+    ${tiers.length>1?`<button class="btn btn-sm btn-danger" onclick="removeTier(this)" style="margin-bottom:0">×</button>`:''}
+  </div>`).join('');
+}
+function addTier(){
+  const list=document.getElementById('tier-list');
+  const div=document.createElement('div');
+  div.className='tier-row';
+  div.style.cssText='display:flex;gap:.5rem;align-items:flex-end;margin-bottom:.5rem';
+  div.innerHTML=`<div style="flex:1"><label>Harga (Rp)</label><input class="tier-amount" type="text" inputmode="numeric" data-raw="0" placeholder="1.000.000" style="font-variant-numeric:tabular-nums"></div>
+    <div style="width:140px"><label>Satuan</label><select class="tier-satuan">${SATUAN_OPTS.map(s=>`<option value="${s}">/${s}</option>`).join('')}</select></div>
+    <button class="btn btn-sm btn-danger" onclick="removeTier(this)" style="margin-bottom:0">×</button>`;
+  list.appendChild(div);
+  bindPrice(div.querySelector('.tier-amount'), 0);
+  div.querySelector('.tier-amount').focus();
+}
+function removeTier(btn){btn.closest('.tier-row').remove()}
+function collectTiers(){
+  const rows=document.querySelectorAll('#tier-list .tier-row');
+  return [...rows].map(r=>{
+    const inp=r.querySelector('.tier-amount');
+    const amount=parseInt(inp?.getAttribute('data-raw')||'0',10);
+    const satuan=r.querySelector('.tier-satuan')?.value||'malam';
+    return {amount,satuan};
+  }).filter(t=>t.amount>0);
 }
 
 // ── COMMON ICONS LIBRARY ──
@@ -322,12 +355,13 @@ function copyUnit(id){
   // Pre-fill form with cloned data after render
   setTimeout(()=>{
     document.getElementById('fu-judul').value=clone.judul;
-    document.getElementById('fu-satuan').value=clone.satuan||'malam';
     document.getElementById('fu-tamu').value=clone.tamu;
     document.getElementById('fu-tag').value=clone.tag;
     document.getElementById('fu-desc').value=clone.desc||'';
     document.getElementById('fu-detail').value=clone.detail||'';
-    bindPrice(document.getElementById('fu-harga'), clone.harga||0);
+    // Re-render tier pricing
+    document.getElementById('tier-list').innerHTML=renderTiers(clone.harga);
+    document.querySelectorAll('.tier-amount').forEach(el=>bindPrice(el, parseInt(el.getAttribute('data-raw'))||0));
     // Re-check gambar checkboxes
     document.querySelectorAll('input[name=imgs]').forEach(c=>{c.checked=(clone.gambar||[]).includes(c.value)});
     // Re-render fitur/fasilitas/rules
@@ -350,10 +384,10 @@ function editUnit(id){
       <h2 style="margin:0">${id?'Edit':'Tambah'} Unit</h2>
     </div>
     <div class="field"><label>Judul</label><input id="fu-judul" value="${esc(u.judul)}"></div>
-    <div class="row"><div class="field"><label>Harga (Rp)</label><input id="fu-harga" type="text" inputmode="numeric" placeholder="1.000.000" style="font-variant-numeric:tabular-nums"></div>
-    <div class="field"><label>Satuan</label><select id="fu-satuan"><option value="malam" ${u.satuan==='malam'?'selected':''}>/malam</option><option value="tahun" ${u.satuan==='tahun'?'selected':''}>/tahun</option><option value="bulan" ${u.satuan==='bulan'?'selected':''}>/bulan</option></select></div>
-    <div class="field"><label>Tamu</label><input id="fu-tamu" type="number" value="${u.tamu}"></div>
+    <div class="row"><div class="field"><label>Tamu</label><input id="fu-tamu" type="number" value="${u.tamu}"></div>
     <div class="field"><label>Status</label><select id="fu-tag"><option ${u.tag==='Available'?'selected':''}>Available</option><option ${u.tag==='Not Available'?'selected':''}>Not Available</option></select></div></div>
+    <div class="section-title">Harga <button class="btn btn-sm" onclick="addTier()">+ Tambah Tier</button></div>
+    <div id="tier-list">${renderTiers(u.harga)}</div>
     <div class="section-title">Fitur Badges <button class="btn btn-sm" onclick="addFitur()">+ Tambah</button></div>
     <div id="fitur-list">${fiturChips}</div>
     <div class="field" style="margin-top:1rem"><label>Deskripsi Singkat</label><textarea id="fu-desc">${esc(u.desc)}</textarea></div>
@@ -369,8 +403,8 @@ function editUnit(id){
       <button class="btn btn-accent" onclick="saveUnit(${id})">Simpan</button>
       <button class="btn" onclick="renderUnits()">Batal</button>
     </div></div>`;
-  // Bind price formatter
-  bindPrice(document.getElementById('fu-harga'), u.harga||0);
+  // Bind price formatters on all tier inputs
+  document.querySelectorAll('.tier-amount').forEach(el=>bindPrice(el, parseInt(el.getAttribute('data-raw'))||0));
   // Upload handler
   const iu=document.getElementById('fu-upload-input');
   if(iu) iu.addEventListener('change',async e=>{
@@ -459,7 +493,7 @@ async function saveUnit(id){
   const fitur=[...document.querySelectorAll('#fitur-list input[data-fit]')].map(h=>h.value);
   const facs=[...document.querySelectorAll('#fac-list input')].map(h=>{const[n,i]=h.value.split('||');return{nama:n,ikon:i}});
   const rls=[...document.querySelectorAll('#rule-list input')].map(h=>{const[n,i]=h.value.split('||');return{aturan:n,ikon:i}});
-  const body={judul:v('fu-judul'),fitur,desc:v('fu-desc'),detail:v('fu-detail'),harga:getRawPrice(),satuan:v('fu-satuan'),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900`,ikon:'la:whatsapp'}]};
+  const body={judul:v('fu-judul'),fitur,desc:v('fu-desc'),detail:v('fu-detail'),harga:collectTiers(),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900`,ikon:'la:whatsapp'}]};
   if(id){await api(`/api/units/${id}`,{method:'PUT',body:JSON.stringify(body)})}
   else{await api('/api/units',{method:'POST',body:JSON.stringify(body)})}
   units=await api('/api/units');
