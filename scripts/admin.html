@@ -265,7 +265,14 @@ async function pickFromList(title, allItems, selectedKeys) {
   }).join('');
   const body=`<input class="pick-search" type="text" placeholder="Cari…" oninput="filterPick(this)">
     <div class="pick-grid" id="${id}">${grid}</div>
-    <div style="text-align:right;margin-top:.5rem"><button class="btn btn-sm" onclick="addCustomPick('${id}')">+ Tambah Manual</button></div>`;
+    <div style="text-align:right;margin-top:.5rem"><button class="btn btn-sm" onclick="toggleCustomPick()">+ Tambah Manual</button></div>
+    <div id="custom-pick-form" style="display:none;margin-top:.5rem;padding:.75rem;background:var(--bg);border-radius:8px">
+      <div style="display:flex;gap:.5rem;align-items:flex-end">
+        <div style="flex:1"><label>Nama</label><input id="custom-pick-name" type="text" placeholder="Nama fasilitas"></div>
+        <div style="flex:1"><label>Icon (iconify)</label><input id="custom-pick-icon" type="text" placeholder="mdi:star-outline"></div>
+        <button class="btn btn-sm btn-accent" onclick="confirmCustomPick()" style="margin-bottom:0">Tambah</button>
+      </div>
+    </div>`;
   // Toggle click on items
   window._pickToggle=function(el){
     const cb=el.querySelector('input');
@@ -282,22 +289,29 @@ window.filterPick=function(inp){
     el.style.display=el.textContent.toLowerCase().includes(q)?'':'none';
   });
 };
-window.addCustomPick=function(gridId){
-  const n=prompt('Nama:');
-  if(!n)return;
-  const i=prompt('Icon (iconify):','mdi:star-outline');
-  if(!i)return;
+window.toggleCustomPick=function(){
+  const f=document.getElementById('custom-pick-form');
+  f.style.display=f.style.display==='none'?'block':'none';
+  if(f.style.display==='block') document.getElementById('custom-pick-name').focus();
+};
+window.confirmCustomPick=function(){
+  const n=document.getElementById('custom-pick-name').value.trim();
+  const i=document.getElementById('custom-pick-icon').value.trim();
+  if(!n||!i)return;
   const key=n+'||'+i;
-  const grid=document.getElementById(gridId);
+  const grid=document.querySelector('.pick-grid');
   const div=document.createElement('div');
   div.className='pick-item selected';
   div.setAttribute('data-key',key);
+  div.setAttribute('onclick','_pickToggle(this)');
   div.innerHTML=`<input type="checkbox" data-pick value="${esc(key)}" checked>
     <span class="pick-icon">${renderIconPreview(i)}</span>
     <span>${esc(n)}</span>`;
-  div.setAttribute('onclick','_pickToggle(this)');
   grid.appendChild(div);
   grid.scrollTop=grid.scrollHeight;
+  document.getElementById('custom-pick-name').value='';
+  document.getElementById('custom-pick-icon').value='';
+  document.getElementById('custom-pick-form').style.display='none';
 };
 
 function copyUnit(id){
