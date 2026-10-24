@@ -1,39 +1,25 @@
-<template>
-  <v-footer class="pa-0">
-    <v-container fluid class="pa-0">
-      <v-row class="mt-16 mb-4 px-4">
-        <v-col>
-          <h1 class="text-center">Need a place to stay?</h1>
-          <h2 class="text-center mt-2">Contact us!</h2>
-        </v-col>
-      </v-row>
-      <v-row justify="center" class="px-4">
-        <v-col cols="12" sm="6" md="3" v-for="(kontak, i) in contacts" :key="i" class="text-center">
-          <a :href="kontak.link" target="_blank" class="footer-link">
-            <h5><Icon :icon="kontak.icon" :inline="true" width="20" height="20" /> {{ kontak.label }}</h5>
-          </a>
-        </v-col>
-      </v-row>
-      <v-row class="mt-10 px-4 pb-4">
-        <v-col><p class="text-center" style="font-weight: 400; color: #666">{{ settings.footer.warning }}</p></v-col>
-      </v-row>
-    </v-container>
-  </v-footer>
-</template>
-
 <script setup>
-import { computed } from 'vue'
-import { Icon } from '@iconify/vue'
 import settings from '@/data/settings.json'
-
-const contacts = computed(() => [
-  { icon: 'la:whatsapp', label: `+${settings.site.whatsapp}`, link: `https://wa.me/${settings.site.whatsapp}?text=Halo%20saya%20mau%20info%20lebih%20lanjut%20tentang%20Paviliun900` },
-  { icon: 'mdi-light:email', label: settings.site.email, link: `mailto:${settings.site.email}?subject=Informasi Paviliun900` },
-  { icon: 'fa-brands:airbnb', label: 'Airbnb Paviliun 900', link: settings.site.airbnbUrl },
-])
+import { whatsappUrl } from '@/utils/property'
+import RevealBlock from '@/components/shared/RevealBlock.vue'
+const contact = whatsappUrl('Hello, I would like to check availability at Paviliun 900.')
 </script>
 
+<template>
+  <footer id="contact" class="site-footer page-width">
+    <RevealBlock class="footer-contact">
+      <div><h2 class="section-title">Find your place in Jogja.</h2><a class="button" :href="contact" target="_blank" rel="noopener noreferrer">Check availability <i class="mdi mdi-arrow-right" aria-hidden="true" /></a></div>
+      <address class="contact-options">
+        <a :href="contact" target="_blank" rel="noopener noreferrer"><i class="mdi mdi-whatsapp" aria-hidden="true" /><span>WhatsApp +{{ settings.site.whatsapp }}</span></a>
+        <a :href="`mailto:${settings.site.email}`"><i class="mdi mdi-email-outline" aria-hidden="true" /><span>{{ settings.site.email }}</span></a>
+        <a :href="settings.site.airbnbUrl" target="_blank" rel="noopener noreferrer"><i class="mdi mdi-airbnb" aria-hidden="true" /><span>Airbnb {{ settings.site.name }}</span></a>
+      </address>
+    </RevealBlock>
+    <div class="footer-bottom"><RouterLink class="footer-brand" :to="{name:'home'}">{{ settings.site.name }}</RouterLink><p>{{ settings.footer.warning }}</p></div>
+  </footer>
+</template>
+
 <style scoped>
-.footer-link { text-decoration: none; color: black; font-size: 1.1rem; font-weight: 400; }
-.footer-link:hover { color: #333; text-decoration: underline; }
+.site-footer{border-top:1px solid var(--line);padding-block:54px 40px}.footer-contact{display:grid;grid-template-columns:1.2fr 1fr;gap:60px;align-items:center;padding-bottom:54px}.footer-contact .section-title{font-size:clamp(36px,4.4vw,66px);margin-bottom:28px}.contact-options{font-style:normal;display:grid;gap:22px;padding-left:60px;border-left:1px solid var(--line)}.contact-options a{display:flex;align-items:center;gap:24px;font-size:16px;text-decoration:none;overflow-wrap:anywhere}.contact-options a:hover{text-decoration:underline}.contact-options .mdi{font-size:26px;flex-shrink:0}.footer-bottom{border-top:1px solid var(--line);padding-top:34px;display:flex;align-items:start;justify-content:space-between;gap:60px}.footer-brand{font-size:29px;letter-spacing:-1.3px;line-height:1.2;text-decoration:none;white-space:nowrap}.footer-bottom p{font-size:11px;line-height:1.7;color:var(--muted);max-width:650px}
+@media(max-width:700px){.site-footer{padding-top:38px}.footer-contact{grid-template-columns:1fr;gap:40px;padding-bottom:40px}.contact-options{border-left:0;border-top:1px solid var(--line);padding:30px 0 0;gap:22px}.contact-options a{font-size:14px;gap:16px}.footer-bottom{flex-direction:column;gap:28px}.footer-contact .section-title{font-size:38px}.footer-brand{font-size:25px}}
 </style>

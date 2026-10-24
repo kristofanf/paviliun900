@@ -1,433 +1,97 @@
-<template>
-  <template v-if="detailUnit">
-  <!-- Hero -->
-  <v-row justify="center" align="center" class="detail-hero">
-    <v-col cols="12" lg="8" md="10">
-      <v-container fluid>
-        <v-btn @click="router.replace({ name: 'home' })" variant="text" color="black" class="mb-4 back-btn">
-          <v-icon start icon="mdi-arrow-left" />
-          Back
-        </v-btn>
-
-        <h1 class="detail-title">{{ detailUnit.judul }}</h1>
-        <div class="fitur-row mb-3">
-          <v-chip v-for="(f, i) in (detailUnit.fitur || [])" :key="i" size="small" variant="flat" color="grey-lighten-3" class="mr-1 mb-1">
-            {{ f }}
-          </v-chip>
-        </div>
-        <h3 class="detail-price">
-          {{ detailUnit.tamu }} Guests<template v-if="detailUnit.luas"> · {{ detailUnit.luas }} m²</template>
-        </h3>
-
-        <!-- Pricing Tiers -->
-        <div class="pricing-section mt-4">
-          <div class="pricing-table">
-            <div
-              v-for="(tier, i) in (detailUnit.harga || [])"
-              :key="i"
-              class="pricing-row"
-              :class="{ 'pricing-best': i === 0 && detailUnit.harga.length > 1 }"
-            >
-              <span class="pricing-label">
-                <template v-if="i === 0 && detailUnit.harga.length > 1">Best Value</template>
-                <template v-else>{{ tier.satuan }}</template>
-              </span>
-              <span class="pricing-amount">{{ formatRupiah(tier.amount) }}</span>
-              <span class="pricing-unit">/{{ tier.satuan }}</span>
-            </div>
-          </div>
-        </div>
-
-        <v-row class="mt-6">
-          <v-col cols="12" lg="8" md="8">
-            <v-img
-              :src="imgUrl(detailUnit.gambar[0])"
-              cover
-              height="100%"
-              min-height="300"
-              class="rounded-xl main-photo"
-            />
-          </v-col>
-          <v-col cols="12" lg="4" md="4" class="d-flex" style="flex-direction: column; gap: 4px">
-            <v-img
-              class="flex-grow-1 rounded-xl"
-              :src="imgUrl(detailUnit.gambar[1])"
-              height="200"
-              cover
-            />
-            <v-img
-              class="flex-grow-1 rounded-xl"
-              :src="imgUrl(detailUnit.gambar[2])"
-              cover
-              height="200"
-            >
-              <v-btn
-                @click="router.push({ name: 'image', params: { id: detailUnit.id } })"
-                class="ma-2"
-                size="small"
-                color="white"
-                style="position: absolute; bottom: 0; right: 0"
-              >
-                Show all Photos
-              </v-btn>
-            </v-img>
-          </v-col>
-        </v-row>
-      </v-container>
-    </v-col>
-  </v-row>
-
-  <!-- Description -->
-  <section class="section-appear">
-    <div class="section-inner">
-      <p class="desc-text">{{ detailUnit.detail }}</p>
-    </div>
-  </section>
-
-  <!-- Divider -->
-  <div class="section-divider" />
-
-  <!-- Facilities -->
-  <section class="section-appear">
-    <div class="section-inner">
-      <h2 class="section-heading">Our Facilities</h2>
-      <div class="fac-grid">
-        <div
-          v-for="(item, n) in detailUnit.fasilitas"
-          :key="n"
-          class="fac-card"
-        >
-          <div class="fac-icon">
-            <Icon :icon="item.ikon" width="28" height="28" />
-          </div>
-          <span class="fac-label">{{ item.nama }}</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Divider -->
-  <div class="section-divider" />
-
-  <!-- House Rules -->
-  <section class="section-appear">
-    <div class="section-inner">
-      <h2 class="section-heading">House Rules</h2>
-      <div class="rules-grid">
-        <div
-          v-for="(item, n) in detailUnit.rules"
-          :key="n"
-          class="rule-item"
-        >
-          <Icon :icon="item.ikon" width="22" height="22" class="rule-icon" />
-          <span>{{ item.aturan }}</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Divider -->
-  <div class="section-divider" />
-
-  <!-- Order -->
-  <section class="section-appear">
-    <div class="section-inner" style="text-align: center">
-      <h2 class="section-heading">How to Order</h2>
-      <div class="order-row">
-        <a
-          v-for="order in detailUnit.order"
-          :key="order.detail"
-          :href="order.link"
-          target="_blank"
-          class="order-btn"
-        >
-          <Icon :icon="order.ikon" width="20" height="20" />
-          <span>{{ order.detail }}</span>
-        </a>
-      </div>
-      <p class="order-note">*Please contact us to check unit availability</p>
-    </div>
-  </section>
-  </template>
-</template>
-
 <script setup>
-import { computed, onMounted, onBeforeUnmount } from 'vue'
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Icon } from '@iconify/vue'
-import { formatHarga, formatRupiah } from '@/utils/format'
 import units from '@/data/units.json'
-
-const router = useRouter()
+import { categoryForPhoto, imgUrl, isNightly, primaryPhoto } from '@/utils/property'
+import { formatRupiah } from '@/utils/format'
+import UnitInformation from '@/components/unit/UnitInformation.vue'
 const route = useRoute()
+const router = useRouter()
 const detailUnit = computed(() => units.find(unit => String(unit.id) === String(route.params.id)))
-
-function imgUrl(name) {
-  return `/img/units/${name}`
-}
-
-function reveal() {
-  const reveals = document.querySelectorAll('.section-appear')
-  const windowHeight = window.innerHeight
-  for (const el of reveals) {
-    const elementTop = el.getBoundingClientRect().top
-    if (elementTop < windowHeight - 100) {
-      el.classList.add('active')
-    }
-  }
-}
-
-onMounted(() => {
-  window.addEventListener('scroll', reveal)
-  reveal()
+const nightly = computed(() => detailUnit.value && isNightly(detailUnit.value))
+const nightlyTier = computed(() => detailUnit.value?.harga?.find(tier => ['night', 'malam'].includes(tier.satuan)))
+const photos = computed(() => (detailUnit.value?.gambar || []).filter(Boolean))
+const heroPhoto = computed(() => photos.value.find(name => categoryForPhoto(name) === 'Living & dining') || primaryPhoto(detailUnit.value))
+const previewPhotos = computed(() => {
+  const rooms = ['Bedrooms', 'Kitchen'].map(category => photos.value.find(name => categoryForPhoto(name) === category)).filter(Boolean)
+  return [...new Set([...rooms, ...photos.value.filter(name => name !== heroPhoto.value)])].slice(0, 2)
 })
-
-onBeforeUnmount(() => {
-  window.removeEventListener('scroll', reveal)
-})
+const contacts = computed(() => detailUnit.value?.order || [])
+const facts = computed(() => detailUnit.value?.fitur || [])
+function openGallery() { router.push({ name: 'image', params: { id: detailUnit.value.id } }) }
 </script>
 
+<template>
+  <article v-if="detailUnit" :key="detailUnit.id" class="unit-detail">
+    <section class="hero detail-hero" :class="{ 'long-term-hero': !nightly }" aria-label="Your space">
+      <img v-if="heroPhoto" class="hero-image" :src="imgUrl(heroPhoto)" :alt="detailUnit.judul" fetchpriority="high" />
+      <div class="page-width detail-hero-inner">
+        <RouterLink class="back-link" :to="{ name: 'home', hash: '#units' }"><span class="mdi mdi-arrow-left" aria-hidden="true" /> Back to our spaces</RouterLink>
+        <div class="detail-hero-content hero-content">
+          <div class="detail-heading">
+            <h1 class="display-title">{{ nightly ? 'Stay together.' : 'Make room for living.' }}</h1>
+            <p class="detail-title">{{ detailUnit.judul }}</p>
+          </div>
+          <div class="detail-summary">
+            <p class="detail-facts">{{ facts.join(' / ') }}<template v-if="detailUnit.luas"> / {{ detailUnit.luas }} m²</template></p>
+            <p class="availability">{{ detailUnit.tag }}</p>
+            <p v-if="nightlyTier" class="hero-price">{{ formatRupiah(nightlyTier.amount) }} <span>/ {{ nightlyTier.satuan }}</span></p>
+            <p v-else-if="detailUnit.tag === 'Not Available'" class="availability-note">Ask about upcoming availability.</p>
+            <a v-for="(order, index) in contacts" :key="index" class="button detail-enquiry" :href="order.link" target="_blank" rel="noopener noreferrer">Check availability<span v-if="contacts.length > 1"> · {{ order.detail }}</span></a>
+            <button class="text-link hero-photo-link" @click="openGallery">Show all Photos <span class="mdi mdi-arrow-right" aria-hidden="true" /></button>
+          </div>
+        </div>
+      </div>
+    </section>
+    <div class="page-width">
+      <div v-if="previewPhotos.length" class="detail-previews" :class="{ 'one-photo': previewPhotos.length === 1 }">
+        <button v-for="photo in previewPhotos" :key="photo" class="preview-photo" :aria-label="`View ${categoryForPhoto(photo).toLowerCase()} photos`" @click="openGallery">
+          <img :src="imgUrl(photo)" :alt="`${detailUnit.judul} — ${categoryForPhoto(photo)}`" loading="lazy" />
+        </button>
+      </div>
+      <p v-else class="empty-photos">Room photographs will be added here.</p>
+      <div v-if="photos.length" class="gallery-actions">
+        <RouterLink class="button button-outline" :to="{ name: 'image', params: { id: detailUnit.id } }">
+          <span class="mdi mdi-image-multiple-outline" aria-hidden="true" />
+          View all photos ({{ photos.length }})
+        </RouterLink>
+      </div>
+      <UnitInformation :unit="detailUnit" />
+    </div>
+  </article>
+</template>
+
 <style scoped>
-/* ── Hero ── */
-.detail-hero {
-  background: #fafafa;
-  padding-bottom: 2rem;
+.detail-hero { min-height: 720px; height: min(860px, 88svh); background: #292927; }
+.detail-hero-inner { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; padding-top: 138px; padding-bottom: 50px; color: white; }
+.detail-hero-content { margin-top: auto; display: grid; grid-template-columns: minmax(0, 1fr) minmax(265px, .42fr); gap: 38px; align-items: end; }
+.detail-heading .display-title { font-size: clamp(70px, 7.5vw, 116px); line-height: 1.03; letter-spacing: -.045em; max-width: 900px; margin: 0 0 20px; }
+.long-term-hero .detail-heading .display-title { font-size: clamp(64px, 6.1vw, 94px); }
+.detail-title { font-size: clamp(20px, 2.1vw, 30px); line-height: 1.35; margin: 0; }
+.detail-facts { font-size: 14px; line-height: 1.7; margin: 0 0 22px; }
+.availability { font-family: var(--display-font); font-size: 29px; margin: 0 0 5px; }
+.availability-note { font-size: 14px; margin: 0 0 24px; }
+.hero-price { font-family: var(--display-font); font-size: 34px; margin: 0 0 20px; white-space: nowrap; }
+.hero-price span { font-size: 18px; }
+.detail-enquiry { width: 100%; margin: 6px 0; }
+.hero-photo-link { display: flex; align-items: center; gap: 12px; margin-top: 16px; color: white; }
+.detail-previews { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 28px; }
+.detail-previews.one-photo { grid-template-columns: 1fr; }
+.gallery-actions { display: flex; justify-content: flex-end; margin-top: 20px; }
+.preview-photo { display: block; overflow: hidden; border: 0; border-radius: 4px; background: #e6e6e2; cursor: pointer; padding: 0; }
+.preview-photo img { width: 100%; height: 310px; display: block; object-fit: cover; transition: transform .45s var(--ease); }
+.preview-photo:hover img { transform: scale(1.025); }
+.empty-photos { padding-block: 32px; color: var(--muted); }
+@media (max-width: 760px) {
+  .detail-hero { height: auto; min-height: 850px; }
+  .detail-hero-inner { min-height: 850px; padding-top: 120px; padding-bottom: 36px; }
+  .detail-hero-content { grid-template-columns: 1fr; gap: 32px; padding-top: 100px; }
+  .detail-heading .display-title, .long-term-hero .detail-heading .display-title { font-size: clamp(58px, 12vw, 86px); }
+  .detail-summary { max-width: 420px; }
+  .detail-facts { margin-bottom: 14px; }
+  .detail-previews { gap: 12px; margin-top: 20px; }
+  .gallery-actions .button { width: 100%; }
+  .preview-photo img { height: 220px; }
 }
-.back-btn {
-  font-size: .85rem;
-  text-transform: none;
-  letter-spacing: 0;
-  font-weight: 500;
-}
-.detail-title {
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  line-height: 1.2;
-  color: #111;
-}
-.detail-price {
-  font-weight: 500;
-  color: #555;
-  font-size: 1.05rem;
-}
-.main-photo {
-  box-shadow: 0 4px 24px rgba(0,0,0,.06);
-}
-
-/* ── Sections ── */
-.section-appear {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.section-appear.active {
-  opacity: 1;
-  transform: translateY(0);
-}
-.section-inner {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 3rem 1.5rem;
-}
-.section-heading {
-  font-size: 1.3rem;
-  font-weight: 700;
-  text-align: center;
-  margin-bottom: 2rem;
-  letter-spacing: -0.01em;
-  color: #111;
-}
-.section-divider {
-  max-width: 900px;
-  margin: 0 auto;
-  height: 1px;
-  background: #e8e8e8;
-}
-
-/* ── Description ── */
-.desc-text {
-  font-size: 1rem;
-  line-height: 1.8;
-  color: #444;
-  text-align: center;
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-/* ── Facilities Grid ── */
-.fac-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 12px;
-}
-.fac-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background: #fafafa;
-  border: 1px solid #f0f0f0;
-  transition: all 0.2s ease;
-}
-.fac-card:hover {
-  border-color: #ddd;
-  box-shadow: 0 2px 12px rgba(0,0,0,.04);
-  transform: translateY(-1px);
-}
-.fac-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  background: #fff;
-  border: 1px solid #eee;
-  flex-shrink: 0;
-  color: #222;
-}
-.fac-label {
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #333;
-  line-height: 1.3;
-}
-
-/* ── Rules ── */
-.rules-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  max-width: 480px;
-  margin: 0 auto;
-}
-.rule-item {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: #fafafa;
-  border: 1px solid #f0f0f0;
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #333;
-  transition: all 0.2s ease;
-}
-.rule-item:hover {
-  border-color: #ddd;
-  background: #fff;
-}
-.rule-icon {
-  color: #555;
-  flex-shrink: 0;
-}
-
-/* ── Order ── */
-.order-row {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-.order-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 28px;
-  border-radius: 10px;
-  background: #111;
-  color: #fff;
-  text-decoration: none;
-  font-size: .9rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-.order-btn:hover {
-  background: #333;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0,0,0,.15);
-}
-.order-note {
-  font-size: .8rem;
-  color: #999;
-  margin-top: 0.5rem;
-}
-
-/* ── Pricing ── */
-.pricing-table {
-  max-width: 380px;
-  margin: 0 auto;
-  border-radius: 12px;
-  overflow: hidden;
-  border: 1px solid #e8e8e8;
-}
-.pricing-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 20px;
-  background: #fafafa;
-  border-bottom: 1px solid #eee;
-}
-.pricing-row:last-child { border-bottom: none; }
-.pricing-label {
-  font-size: .85rem;
-  color: #666;
-  min-width: 80px;
-}
-.pricing-amount {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: #111;
-  flex: 1;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.pricing-unit {
-  font-size: .8rem;
-  color: #999;
-}
-.pricing-best {
-  background: #111;
-  color: #fff;
-}
-.pricing-best .pricing-label {
-  color: #25D366;
-  font-weight: 600;
-  font-size: .75rem;
-  text-transform: uppercase;
-  letter-spacing: .04em;
-}
-.pricing-best .pricing-amount {
-  color: #fff;
-}
-.pricing-best .pricing-unit {
-  color: rgba(255,255,255,.5);
-}
-
-/* ── Responsive ── */
-@media (max-width: 600px) {
-  .fac-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-  }
-  .fac-card {
-    padding: 10px 12px;
-    gap: 8px;
-  }
-  .fac-icon {
-    width: 34px;
-    height: 34px;
-  }
-  .section-inner {
-    padding: 2rem 1rem;
-  }
-  .section-heading {
-    font-size: 1.15rem;
-  }
-}
+@media (prefers-reduced-motion: reduce) { .preview-photo img { transition: none; } .preview-photo:hover img { transform: none; } }
 </style>

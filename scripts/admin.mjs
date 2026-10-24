@@ -4,7 +4,7 @@ import crypto from 'node:crypto'
 import { readFileSync, writeFileSync, existsSync, readdirSync, unlinkSync, mkdirSync, lstatSync, renameSync } from 'node:fs'
 import { join, resolve, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { execFileSync } from 'node:child_process'
+import { createCommandRunner } from './commands.mjs'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const COOKIE = 'paviliun_session'
@@ -44,10 +44,7 @@ function writeJSON(file, data) {
 }
 
 export function createAdminApp({ root = ROOT, password = process.env.ADMIN_PASS, now = Date.now,
-  sessionTtlMs = 8 * 60 * 60 * 1000, runCommand = (file, args) => execFileSync(file, args, {
-    cwd: root, encoding: 'utf8', timeout: 180000, stdio: 'pipe', shell: false,
-    env: { ...process.env, GIT_TERMINAL_PROMPT: '0' },
-  }) } = {}) {
+  sessionTtlMs = 8 * 60 * 60 * 1000, runCommand = createCommandRunner(root) } = {}) {
   if (typeof password !== 'string' || password.length < 12) throw new Error('Set ADMIN_PASS to a password of at least 12 characters before starting the CMS.')
   const passwordHash = hash(password)
   const DATA = join(root, 'src/data/units.json')
@@ -162,6 +159,14 @@ export function createAdminApp({ root = ROOT, password = process.env.ADMIN_PASS,
   app.delete('/api/images/:name', (req, res) => {
     const file = imagePath(req.params.name)
     if (!file) return res.status(400).json({ error: 'Invalid image filename' })
+    const name = req.params.name
+    const settings = readJSON(SETTINGS)
+    // Protect case variants consistently, including on case-insensitive filesystems.
+    const matches = reference => typeof reference === 'string' && reference.toLowerCase() === name.toLowerCase()
+    if (readJSON(DATA).some(unit => unit.gambar?.some(matches)) ||
+      matches(settings.hero?.coverImage) || matches(settings.about?.image)) {
+      return res.status(409).json({ error: 'Image is in use. Remove it from Units and homepage settings before deleting it.' })
+    }
     if (existsSync(file)) unlinkSync(file)
     res.json({ ok: true })
   })

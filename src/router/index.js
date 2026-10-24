@@ -28,8 +28,11 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  scrollBehavior() {
-    document.getElementById('app')?.scrollIntoView({ behavior: 'smooth' })
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) return savedPosition
+    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    if (to.hash) return { el: to.hash, top: 24, behavior }
+    return { left: 0, top: 0, behavior: 'auto' }
   },
 })
 

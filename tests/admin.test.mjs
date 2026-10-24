@@ -108,6 +108,30 @@ test('uploads reject active content and give images unique filenames', async t =
   assert.equal((await f.request('/img/units/' + files[0])).status, 200)
 })
 
+test('referenced Unit, hero, and about images cannot be deleted', async t => {
+  const f = await setup(t)
+  await f.login()
+  const units = await (await f.request('/api/units')).json()
+  const settings = await (await f.request('/api/settings')).json()
+  const unitPhoto = units[0].gambar[0]
+  writeFileSync(join(f.root, 'public/img/units', unitPhoto), 'unit-photo')
+  for (const name of [unitPhoto, settings.hero.coverImage, settings.about.image]) {
+    for (const variant of [name.toUpperCase(), name]) {
+      const response = await f.request('/api/images/' + variant, { method: 'DELETE' })
+      assert.equal(response.status, 409, variant)
+      assert.match((await response.json()).error, /in use/i)
+      assert.equal(existsSync(join(f.root, 'public/img/units', name)), true)
+    }
+  }
+  assert.deepEqual(await (await f.request('/api/units')).json(), units)
+  assert.deepEqual(await (await f.request('/api/settings')).json(), settings)
+  for (const unit of units) {
+    assert.equal((await f.request('/api/units/' + unit.id, json({ gambar: unit.gambar.filter(name => name !== unitPhoto) })) ).status, 200)
+  }
+  assert.equal((await f.request('/api/images/' + unitPhoto, { method: 'DELETE' })).status, 200)
+  assert.equal(existsSync(join(f.root, 'public/img/units', unitPhoto)), false)
+})
+
 test('partial settings updates preserve custom lists and reject broken settings', async t => {
   const f = await setup(t)
   await f.login()
@@ -176,34 +200,50 @@ test('build/publish failures never produce success', async t => {
   assert.deepEqual(await response.json(), { ok: false, error: 'Deployment failed during: build and publish' })
 })
 
-test('deployment script works with a main branch and keeps credentials out of Git arguments', async t => {
+test('command runner launches npm without a shell and preserves literal arguments', async t => {
   const f = await setup(t)
-  mkdirSync(join(f.root, 'bin'))
+  const { createCommandRunner } = await import('../scripts/commands.mjs')
+  const run = createCommandRunner(f.root)
+  assert.match(run('npm', ['--version']).trim(), /^\d+\.\d+\.\d+$/)
+  const literal = 'spaces & $(do-not-execute) "quoted"'
+  assert.equal(run(process.execPath, ['-e', 'process.stdout.write(process.argv[1])', literal]), literal)
+  assert.throws(() => run(process.execPath, ['-e', 'process.exit(7)']))
+})
+
+test('publication works with a main branch and stops after a failed build', async t => {
+  const f = await setup(t)
+  const { createCommandRunner } = await import('../scripts/commands.mjs')
+  const { deployStatic } = await import('../scripts/deploy.mjs')
   mkdirSync(join(f.root, 'dist'))
   writeFileSync(join(f.root, 'dist/index.html'), '<html>test-build</html>')
-  writeFileSync(join(f.root, 'bin/npm'), '#!/bin/sh\nexit "${TEST_BUILD_EXIT:-0}"\n', { mode: 0o755 })
-  const gitExecutable = spawnSync('which', ['git'], { encoding: 'utf8' }).stdout.trim()
-  writeFileSync(join(f.root, 'bin/git'), `#!${process.execPath}\n` + `
-const {spawnSync}=require('node:child_process');
-const {appendFileSync}=require('node:fs');
-const args=process.argv.slice(2);
-if(args[0]==='push'){
-  appendFileSync(process.env.TEST_GIT_LOG,JSON.stringify(args)+'\\n');
-  process.exit(0);
-}
-if(args[0]==='init')args.push('--initial-branch=main');
-const result=spawnSync(${JSON.stringify(gitExecutable)},['-c','user.name=Test','-c','user.email=test@example.invalid',...args],{stdio:'ignore'});
-process.exit(result.status??1);
-`, { mode: 0o755 })
-  const log = join(f.root, 'git-arguments.jsonl')
-  const env = { ...process.env, PATH: join(f.root, 'bin') + ':' + process.env.PATH, TEST_GIT_LOG: log, GITHUB_TOKEN: 'test-credential-canary' }
-  const result = spawnSync('sh', [join(repository, 'deploy.sh')], { cwd: f.root, env, encoding: 'utf8' })
-  assert.equal(result.status, 0, result.stderr)
-  const args = JSON.parse(readFileSync(log, 'utf8').trim())
-  assert.equal(args.at(-1), 'HEAD:production')
-  assert.ok(!args.join(' ').includes(env.GITHUB_TOKEN))
-  assert.equal(spawnSync(gitExecutable, ['branch', '--show-current'], { cwd: join(f.root, 'dist'), encoding: 'utf8' }).stdout.trim(), 'main')
-  const failure = spawnSync('sh', [join(repository, 'deploy.sh')], { cwd: f.root, env: { ...env, TEST_BUILD_EXIT: '7' }, encoding: 'utf8' })
-  assert.equal(failure.status, 7)
-  assert.equal(readFileSync(log, 'utf8').trim().split('\n').length, 1, 'failed build must not attempt another push')
+  const run = createCommandRunner(f.root)
+  const pushes = []
+  let failBuild = false
+  const runCommand = (file, args, options) => {
+    if (file === 'npm') {
+      assert.deepEqual(args, ['run', 'build'])
+      if (failBuild) throw new Error('build failed')
+      return ''
+    }
+    if (args[0] === 'push') { pushes.push(args); return '' }
+    const gitArgs = args[0] === 'init' ? [...args, '--initial-branch=main'] : args
+    return run(file, ['-c', 'user.name=Test', '-c', 'user.email=test@example.invalid', ...gitArgs], options)
+  }
+  deployStatic({ root: f.root, runCommand })
+  assert.equal(readFileSync(join(f.root, 'dist/404.html'), 'utf8'), '<html>test-build</html>')
+  assert.equal(readFileSync(join(f.root, 'dist/CNAME'), 'utf8').trim(), 'paviliun900.com')
+  assert.deepEqual(pushes, [['push', '-f', 'https://github.com/kristofanf/paviliun900.git', 'HEAD:production']])
+  assert.equal(run('git', ['branch', '--show-current'], { cwd: join(f.root, 'dist') }).trim(), 'main')
+  failBuild = true
+  assert.throws(() => deployStatic({ root: f.root, runCommand }), /build failed/)
+  assert.equal(pushes.length, 1, 'failed build must not attempt another push')
+  for (const failingStep of ['init', 'add', 'commit', 'push']) {
+    const attempted = []
+    assert.throws(() => deployStatic({ root: f.root, runCommand: (file, args) => {
+      attempted.push(file === 'npm' ? 'build' : args[0])
+      if (args[0] === failingStep) throw new Error('injected Git failure')
+      return ''
+    } }), /injected Git failure/)
+    assert.deepEqual(attempted, ['build', 'init', 'add', 'commit', 'push'].slice(0, ['build', 'init', 'add', 'commit', 'push'].indexOf(failingStep) + 1))
+  }
 })

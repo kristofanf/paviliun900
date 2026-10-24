@@ -31,10 +31,34 @@ cookies with an eight-hour lifetime. Logout, process restart, or a password chan
 followed by restart invalidates sessions. Failed logins are throttled.
 Keep this administrative service private; the public website is the static build.
 
+Open <http://127.0.0.1:3456> on the computer running `npm run admin`.
+A public source repository lets others read or run their own copy of the CMS;
+it does not expose your local CMS. GitHub Pages cannot run the Node CMS.
+Do not expose this loopback listener with a public tunnel or proxy.
+
 The CMS supports JPEG, PNG, WebP, and GIF images. Uploaded images receive unique
 filenames. Settings saves preserve custom facility/rule lists and reject invalid
 content. Old browser-stored GitHub tokens and admin sessions are cleared on load;
 the old `scripts/.auth.json` file is no longer used.
+Images used by a unit, the hero, or the about section cannot be deleted until
+those references are removed. Inline unit photo uploads preserve unsaved edits
+and select the new photos. Editing or copying a unit preserves its booking links.
+
+## Public frontend
+
+The public Vue site follows the Monochrome Residence design: full-width photo
+heroes, generous white space, shared navigation, short stays and long-term
+rental comparisons, unit details, and a keyboard-accessible photo viewer.
+Content and prices still come from `src/data/settings.json` and
+`src/data/units.json`. New photographs remain accessible under All photos;
+room filters use only explicitly classified images.
+
+Run `npm run dev` for a local preview. Finite entrance/reveal animations respect
+the visitor's reduced-motion preference. Bodoni Moda and DM Sans are self-hosted
+under `public/fonts/`, with their SIL Open Font License files included alongside
+them. These freely licensed fonts substitute for the commercial mockup fonts.
+Design references and captured previews live in the ignored `design-mockups/`
+folder and are not included in GitHub Pages builds.
 
 ## Checks
 
@@ -64,3 +88,6 @@ The CMS commits its content paths, pushes the source to `master`, builds the
 website, and publishes `dist` to the `production` branch. Failures stop the
 sequence and appear as failures in the UI. No-change retries still build and
 publish. `npm run deploy` builds and publishes the static site directly.
+Deployment runs through Node on Windows, macOS, and Linux; it does not require
+a Unix shell. Git must be installed and configured with your commit identity
+and repository push access.

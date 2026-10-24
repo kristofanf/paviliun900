@@ -113,7 +113,7 @@ textarea{min-height:80px;resize:vertical}
   </div>
 </div>
 <script>
-let units=[], settings={}, images=[];
+let units=[], settings={}, images=[], editingUnitOrder=[];
 // Remove credentials saved by older versions; sessions now use HttpOnly cookies.
 localStorage.removeItem('gh_token');
 sessionStorage.removeItem('auth');
@@ -355,31 +355,17 @@ window.confirmCustomPick=function(){
 function copyUnit(id){
   const src=units.find(x=>x.id===id);
   if(!src)return;
-  const clone={...src, id:0, judul:src.judul+' (Copy)', gambar:[...src.gambar], fitur:[...src.fitur], fasilitas:src.fasilitas.map(f=>({...f})), rules:src.rules.map(r=>({...r}))};
-  editUnit(0);
-  // Pre-fill form with cloned data after render
-  setTimeout(()=>{
-    document.getElementById('fu-judul').value=clone.judul;
-    if(clone.luas) document.getElementById('fu-luas').value=clone.luas;
-    document.getElementById('fu-tamu').value=clone.tamu;
-    document.getElementById('fu-tag').value=clone.tag;
-    document.getElementById('fu-desc').value=clone.desc||'';
-    document.getElementById('fu-detail').value=clone.detail||'';
-    // Re-render tier pricing
-    document.getElementById('tier-list').innerHTML=renderTiers(clone.harga);
-    document.querySelectorAll('.tier-amount').forEach(el=>bindPrice(el, parseInt(el.getAttribute('data-raw'))||0));
-    // Re-check gambar checkboxes
-    document.querySelectorAll('input[name=imgs]').forEach(c=>{c.checked=(clone.gambar||[]).includes(c.value)});
-    // Re-render fitur/fasilitas/rules
-    document.getElementById('fitur-list').innerHTML=(clone.fitur||[]).map(f=>`<span class="chip">${esc(f)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fit value="${esc(f)}"></span>`).join('');
-    document.getElementById('fac-list').innerHTML=(clone.fasilitas||[]).map(f=>`<span class="chip">${renderIconPreview(f.ikon)} ${esc(f.nama)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${esc(f.nama)}||${esc(f.ikon)}"></span>`).join('');
-    document.getElementById('rule-list').innerHTML=(clone.rules||[]).map(r=>`<span class="chip">${renderIconPreview(r.ikon)} ${esc(r.aturan)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rn data-ri value="${esc(r.aturan)}||${esc(r.ikon)}"></span>`).join('');
-  },50);
+  editUnit(0,{...structuredClone(src),id:0,judul:src.judul+' (Copy)'});
 }
 
-function editUnit(id){
-  const u=id?units.find(x=>x.id===id):{id:0,judul:'',fitur:[],desc:'',detail:'',harga:0,satuan:'malam',tamu:'',tag:'Available',gambar:[],fasilitas:[],rules:[],order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}`,ikon:'la:whatsapp'}]};
-  const imgChecks=images.map(f=>`<label><input type="checkbox" name="imgs" value="${esc(f)}" ${(u.gambar||[]).includes(f)?'checked':''}><img src="/img/units/${esc(f)}"></label>`).join('');
+function renderUnitImages(selected){
+  return images.map(f=>`<label><input type="checkbox" name="imgs" value="${esc(f)}" ${selected.includes(f)?'checked':''}><img src="/img/units/${esc(f)}"></label>`).join('')||'<p style="color:var(--muted)">Upload foto atau pilih dari Media Library</p>';
+}
+
+function editUnit(id,draft){
+  const u=draft||(id?units.find(x=>x.id===id):{id:0,judul:'',fitur:[],desc:'',detail:'',harga:[],tamu:'',tag:'Available',gambar:[],fasilitas:[],rules:[],order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900`,ikon:'la:whatsapp'}]});
+  editingUnitOrder=structuredClone(u.order||[]);
+  const imgChecks=renderUnitImages(u.gambar||[]);
   const fiturChips=(u.fitur||[]).map(f=>`<span class="chip">${esc(f)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fit value="${esc(f)}"></span>`).join('');
   const facs=(u.fasilitas||[]).map(f=>`<span class="chip">${renderIconPreview(f.ikon)} ${esc(f.nama)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${esc(f.nama)}||${esc(f.ikon)}"></span>`).join('');
   const rls=(u.rules||[]).map(r=>`<span class="chip">${renderIconPreview(r.ikon)} ${esc(r.aturan)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rn data-ri value="${esc(r.aturan)}||${esc(r.ikon)}"></span>`).join('');
@@ -400,7 +386,7 @@ function editUnit(id){
     <div class="field"><label>Detail Lengkap</label><textarea id="fu-detail" style="min-height:120px">${esc(u.detail)}</textarea></div>
     <div class="section-title">Foto Unit</div>
     <div style="margin-bottom:.75rem"><label class="btn btn-sm" style="cursor:pointer">📁 Upload Foto Baru<input type="file" id="fu-upload-input" multiple accept="image/*" style="display:none"></label></div>
-    <div class="img-grid">${imgChecks||'<p style="color:var(--muted)">Upload foto atau pilih dari Media Library</p>'}</div>
+    <div class="img-grid" id="fu-images">${imgChecks}</div>
     <div class="section-title">Fasilitas <button class="btn btn-sm" onclick="pickFac()">+ Pilih / Tambah</button></div>
     <div id="fac-list">${facs}</div>
     <div class="section-title">House Rules <button class="btn btn-sm" onclick="pickRule()">+ Pilih / Tambah</button></div>
@@ -415,10 +401,18 @@ function editUnit(id){
   const iu=document.getElementById('fu-upload-input');
   if(iu) iu.addEventListener('change',async e=>{
     if(!e.target.files.length)return;
+    const grid=document.getElementById('fu-images');
     const fd=new FormData();for(const f of e.target.files) fd.append('files',f,f.name);
-    await api('/api/upload',{method:'POST',body:fd});
-    images=await api('/api/images');
-    editUnit(id);
+    iu.disabled=true;
+    try{
+      const uploaded=await api('/api/upload',{method:'POST',body:fd});
+      images=await api('/api/images');
+      // Only update this editor's photos; other fields remain the live draft.
+      if(grid.isConnected){
+        const selected=[...grid.querySelectorAll('input:checked')].map(c=>c.value);
+        grid.innerHTML=renderUnitImages([...selected,...uploaded.files]);
+      }
+    }finally{iu.disabled=false;iu.value=''}
   });
   // Inject iconify script if not loaded
   if(!document.querySelector('script[src*="iconify"]')){
@@ -499,7 +493,7 @@ async function saveUnit(id){
   const fitur=[...document.querySelectorAll('#fitur-list input[data-fit]')].map(h=>h.value);
   const facs=[...document.querySelectorAll('#fac-list input')].map(h=>{const[n,i]=h.value.split('||');return{nama:n,ikon:i}});
   const rls=[...document.querySelectorAll('#rule-list input')].map(h=>{const[n,i]=h.value.split('||');return{aturan:n,ikon:i}});
-  const body={judul:v('fu-judul'),luas:parseInt(v('fu-luas'))||'',fitur,desc:v('fu-desc'),detail:v('fu-detail'),harga:collectTiers(),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}?text=Halo%20saya%20mau%20pesan%20airbnb%20Paviliun900`,ikon:'la:whatsapp'}]};
+  const body={judul:v('fu-judul'),luas:parseInt(v('fu-luas'))||'',fitur,desc:v('fu-desc'),detail:v('fu-detail'),harga:collectTiers(),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:structuredClone(editingUnitOrder)};
   if(id){await api(`/api/units/${id}`,{method:'PUT',body:JSON.stringify(body)})}
   else{await api('/api/units',{method:'POST',body:JSON.stringify(body)})}
   units=await api('/api/units');

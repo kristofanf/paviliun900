@@ -1,14 +1,11 @@
-<template>
-  <v-app>
-    <v-main style="background-color: #F5F5F5">
-      <router-view />
-      <FloatButton />
-      <FooterSection />
-    </v-main>
-  </v-app>
-</template>
-
 <script setup>
 import FooterSection from '@/components/FooterSection.vue'
-import FloatButton from '@/components/FloatButton.vue'
+import SiteHeader from '@/components/shared/SiteHeader.vue'
 </script>
+
+<template>
+  <a class="skip-link" href="#main-content">Skip to content</a>
+  <SiteHeader />
+  <main id="main-content" tabindex="-1"><RouterView /></main>
+  <FooterSection />
+</template>

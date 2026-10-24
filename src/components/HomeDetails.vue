@@ -1,59 +1,38 @@
-<template>
-  <div ref="detailsRef">
-    <v-row style="margin-top: 10%; margin-bottom: 10%">
-      <v-col cols="12" md="6">
-        <v-img :src="imgUrl(settings.about.image)" height="500" width="100%" :aspect-ratio="1" cover class="lahan" />
-      </v-col>
-      <v-col class="d-flex justify-center align-center" cols="12" md="6">
-        <div>
-          <h2 v-if="!isMobile" class="text-center" style="font-weight: 300">{{ settings.about.text }}</h2>
-          <h4 v-else class="ma-5 text-center" style="font-weight: 300; font-size: 1rem">{{ settings.about.text }}</h4>
-        </div>
-      </v-col>
-    </v-row>
-
-    <div class="appear">
-      <v-card class="mx-auto" max-width="auto" flat>
-        <v-container fluid style="background-color: #fff">
-          <div style="width: 100%; margin: 2rem">
-            <h2 class="text-center" style="font-weight: 500; font-size: 2rem">UNITS FOR RENT</h2>
-          </div>
-          <AirbnbCard />
-        </v-container>
-        <v-container><MapsCard /></v-container>
-        <v-container><ReviewCard /></v-container>
-      </v-card>
-    </div>
-  </div>
-</template>
-
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
 import AirbnbCard from './AirbnbCard.vue'
 import MapsCard from './MapsCard.vue'
 import ReviewCard from './ReviewCard.vue'
+import RevealBlock from '@/components/shared/RevealBlock.vue'
 import settings from '@/data/settings.json'
-
-const isMobile = ref(false)
-
-function imgUrl(name) { return `/img/units/${name}` }
-function onResize() { isMobile.value = window.innerWidth < 600 }
-function reveal() {
-  const reveals = document.querySelectorAll('.appear')
-  const windowHeight = window.innerHeight
-  for (const el of reveals) {
-    const elementTop = el.getBoundingClientRect().top
-    if (elementTop < windowHeight - 200) el.classList.add('active')
-    else el.classList.remove('active')
-  }
-}
-onMounted(() => { onResize(); reveal(); window.addEventListener('scroll', reveal); window.addEventListener('resize', onResize, { passive: true }) })
-onBeforeUnmount(() => { window.removeEventListener('scroll', reveal); window.removeEventListener('resize', onResize) })
+import { imgUrl } from '@/utils/property'
 </script>
 
+<template>
+  <div class="page-width home-details">
+    <RevealBlock class="home-intro">
+      <h2 class="section-title">A home base in the heart of Jogja.</h2>
+      <p class="intro-source">{{ settings.hero.title }} <span aria-hidden="true">—</span> {{ settings.hero.subtitle }}</p>
+    </RevealBlock>
+    <AirbnbCard />
+    <RevealBlock tag="section" class="home-about section-space" aria-label="About Paviliun 900">
+      <img class="about-photo" :src="imgUrl(settings.about.image)" alt="Quiet courtyard and homes at Paviliun 900" loading="lazy" width="800" height="540" />
+      <div>
+        <h2 class="section-title">Comfort,<br />without the rush.</h2>
+        <p class="body-copy">{{ settings.about.text }}</p>
+        <RouterLink class="text-link" to="/about">About the residence <i class="mdi mdi-arrow-right" aria-hidden="true" /></RouterLink>
+      </div>
+    </RevealBlock>
+    <MapsCard />
+    <ReviewCard />
+  </div>
+</template>
+
 <style scoped>
-.appear { position: relative; transform: translateY(150px); opacity: 0; transition: 2s all ease; }
-.appear.active { transform: translateY(0); opacity: 1; }
-.lahan { transition: all 0.5s ease-in-out; }
-.lahan:hover { transform: scale(1.05); }
+.home-intro { padding-block: 52px 88px; }
+.home-intro .section-title { font-size: clamp(36px, 5.5vw, 84px); letter-spacing: -.045em; }
+.intro-source { margin: 20px 0 0; font-size: 14px; color: var(--muted); }
+.home-about { display: grid; grid-template-columns: 1.35fr .85fr; align-items: center; gap: 60px; }
+.about-photo { display: block; width: 100%; height: auto; aspect-ratio: 1.54; object-fit: cover; border-radius: 4px; }
+.home-about .body-copy { margin-block: 24px; }
+@media (max-width: 700px) { .home-intro { padding-block: 44px 64px; } .home-about { grid-template-columns: 1fr; gap: 30px; } .intro-source { line-height: 1.7; } }
 </style>
