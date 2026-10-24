@@ -1,4 +1,5 @@
 <template>
+  <template v-if="detailUnit">
   <!-- Hero -->
   <v-row justify="center" align="center" class="detail-hero">
     <v-col cols="12" lg="8" md="10">
@@ -61,7 +62,7 @@
               height="200"
             >
               <v-btn
-                @click="router.push({ name: 'image' })"
+                @click="router.push({ name: 'image', params: { id: detailUnit.id } })"
                 class="ma-2"
                 size="small"
                 color="white"
@@ -147,16 +148,19 @@
       <p class="order-note">*Please contact us to check unit availability</p>
     </div>
   </section>
+  </template>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import { useRouter } from 'vue-router'
+import { computed, onMounted, onBeforeUnmount } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { Icon } from '@iconify/vue'
 import { formatHarga, formatRupiah } from '@/utils/format'
+import units from '@/data/units.json'
 
 const router = useRouter()
-const detailUnit = ref(null)
+const route = useRoute()
+const detailUnit = computed(() => units.find(unit => String(unit.id) === String(route.params.id)))
 
 function imgUrl(name) {
   return `/img/units/${name}`
@@ -174,11 +178,6 @@ function reveal() {
 }
 
 onMounted(() => {
-  detailUnit.value = JSON.parse(sessionStorage.getItem('unit'))
-  if (!detailUnit.value) {
-    router.replace({ name: 'home' }).then(() => router.go())
-    return
-  }
   window.addEventListener('scroll', reveal)
   reveal()
 })

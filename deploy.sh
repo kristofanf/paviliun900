@@ -14,14 +14,12 @@ echo 'paviliun900.com' > CNAME
 
 git init
 git add -A
-git commit -m 'deploy'
+git commit --allow-empty -m 'deploy'
 
 # push to GitHub Pages production branch
-# Uses GITHUB_TOKEN env var or falls back to interactive auth
-if [ -n "$GITHUB_TOKEN" ]; then
-  git push -f https://kristofanf:${GITHUB_TOKEN}@github.com/kristofanf/paviliun900.git master:production
-else
-  git push -f https://github.com/kristofanf/paviliun900.git master:production
-fi
+# Use the configured Git credential helper or cloud HTTPS proxy. Never put a
+# credential in a URL, command argument, or browser storage. HEAD works with
+# either default branch name in the generated repository.
+GIT_TERMINAL_PROMPT=0 git push -f https://github.com/kristofanf/paviliun900.git HEAD:production
 
 cd -

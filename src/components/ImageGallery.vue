@@ -1,8 +1,9 @@
 <template>
+  <template v-if="detailUnit">
   <v-row justify="center" align="center" style="background-color: white">
     <v-col cols="12" lg="8" md="10">
       <v-container>
-        <v-btn @click="router.replace({ name: 'detail' })" class="mb-3" elevation="1" color="black">
+        <v-btn @click="router.replace({ name: 'detail', params: { id: detailUnit.id } })" class="mb-3" elevation="1" color="black">
           <v-icon start icon="mdi-arrow-left" />
           Back
         </v-btn>
@@ -46,14 +47,17 @@
       </v-img>
     </div>
   </Teleport>
+  </template>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import units from '@/data/units.json'
 
 const router = useRouter()
-const detailUnit = ref(null)
+const route = useRoute()
+const detailUnit = computed(() => units.find(unit => String(unit.id) === String(route.params.id)))
 const dataImage = ref(null)
 
 function imgUrl(name) {
@@ -64,12 +68,6 @@ function showImage(name) {
   dataImage.value = imgUrl(name)
 }
 
-onMounted(() => {
-  detailUnit.value = JSON.parse(sessionStorage.getItem('unit'))
-  if (!detailUnit.value) {
-    router.replace({ name: 'home' }).then(() => router.go())
-  }
-})
 </script>
 
 <style scoped>

@@ -69,8 +69,7 @@ const sortedUnits = computed(() => {
 function imgUrl(name) { return `/img/units/${name}` }
 
 function goDetail(unit) {
-  sessionStorage.setItem('unit', JSON.stringify(unit))
-  router.push({ name: 'detail' })
+  router.push({ name: 'detail', params: { id: unit.id } })
 }
 </script>
 

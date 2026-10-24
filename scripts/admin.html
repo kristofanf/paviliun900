@@ -91,7 +91,7 @@ textarea{min-height:80px;resize:vertical}
     <h1>Paviliun 900</h1>
     <nav><a href="#" data-page="units" class="active">Units</a><a href="#" data-page="homepage">Homepage</a><a href="#" data-page="media">Media</a></nav>
     <div style="margin-left:auto;display:flex;align-items:center;gap:.5rem">
-      <button class="btn btn-sm" onclick="setupToken()" style="color:#fff;border-color:rgba(255,255,255,.3);background:transparent;font-size:.75rem" id="token-btn">🔑 Setup Token</button>
+      <button class="btn btn-sm" onclick="doLogout()" style="color:#fff;border-color:rgba(255,255,255,.3);background:transparent;font-size:.75rem" id="logout-btn">Keluar</button>
       <button class="btn btn-sm" onclick="deployLive()" style="background:#25D366;color:#fff;border-color:#25D366" id="deploy-btn">🚀 Deploy ke Live</button>
     </div>
   </div>
@@ -113,7 +113,10 @@ textarea{min-height:80px;resize:vertical}
   </div>
 </div>
 <script>
-let AUTH='', units=[], settings={}, images=[];
+let units=[], settings={}, images=[];
+// Remove credentials saved by older versions; sessions now use HttpOnly cookies.
+localStorage.removeItem('gh_token');
+sessionStorage.removeItem('auth');
 
 // ── MODAL SYSTEM ──
 function modalShow(title, bodyHTML, opts={}) {
@@ -135,16 +138,16 @@ function modalShow(title, bodyHTML, opts={}) {
   });
 }
 function mPrompt(title, placeholder='', def='') {
-  return modalShow(title, `<input id="modal-input" placeholder="${placeholder}" value="${def}">`);
+  return modalShow(title, `<input id="modal-input" placeholder="${esc(placeholder)}" value="${esc(def)}">`);
 }
 function mConfirm(msg) {
-  return modalShow('Konfirmasi', `<p>${msg}</p>`, {confirm:true, okText:'Ya, Hapus'});
+  return modalShow('Konfirmasi', `<p>${esc(msg)}</p>`, {confirm:true, okText:'Ya, Hapus'});
 }
 function mAlert(msg) {
-  return modalShow('Info', `<p>${msg}</p>`, {okText:'OK'});
+  return modalShow('Info', `<p>${esc(msg)}</p>`, {okText:'OK'});
 }
 function mPromptMulti(fields) {
-  const html=fields.map(f=>`<label style="margin-bottom:2px">${f.label}</label><input id="mp-${f.id}" placeholder="${f.placeholder||''}" value="${f.value||''}">`).join('');
+  const html=fields.map(f=>`<label style="margin-bottom:2px">${esc(f.label)}</label><input id="mp-${esc(f.id)}" placeholder="${esc(f.placeholder)}" value="${esc(f.value)}">`).join('');
   return modalShow(fields[0].title||'Isi Data', html).then(()=>{
     const r={}; fields.forEach(f=>{r[f.id]=document.getElementById('mp-'+f.id)?.value||''}); return r;
   });
@@ -169,38 +172,40 @@ function bindPrice(el, val){
 function getRawPrice(){return parseInt(document.getElementById('fu-harga')?.getAttribute('data-raw')||'0',10)}
 
 // ── AUTH ──
+function showLogin(){
+  document.getElementById('login-page').style.display='block';
+  document.getElementById('app-page').style.display='none';
+}
 async function doLogin(){
-  const pass=document.getElementById('login-pass').value;
   try{
-    const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pass})});
-    const d=await r.json();
-    if(d.ok){
-      AUTH=d.token; sessionStorage.setItem('auth',AUTH);
-      document.getElementById('login-page').style.display='none';
-      document.getElementById('app-page').style.display='block';
-      init();
-    }else{document.getElementById('login-error').textContent=d.error||'Gagal login'}
-  }catch(e){document.getElementById('login-error').textContent='Server error'}
+    await api('/api/login',{method:'POST',body:JSON.stringify({password:document.getElementById('login-pass').value})});
+    document.getElementById('login-pass').value='';
+    document.getElementById('login-error').textContent='';
+    await init();
+    document.getElementById('login-page').style.display='none';
+    document.getElementById('app-page').style.display='block';
+  }catch(e){document.getElementById('login-error').textContent=e.message}
 }
+async function doLogout(){await api('/api/logout',{method:'POST'});showLogin()}
 document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
-if(sessionStorage.getItem('auth')){
-  AUTH=sessionStorage.getItem('auth');
-  document.getElementById('login-page').style.display='none';
-  document.getElementById('app-page').style.display='block';
-  init();
+async function api(path,opts={}){
+  const headers={'X-Requested-With':'PaviliunCMS',...opts.headers};
+  if(typeof opts.body==='string') headers['Content-Type']='application/json';
+  const response=await fetch(path,{...opts,credentials:'same-origin',headers});
+  const data=await response.json();
+  if(!response.ok){if(response.status===401)showLogin();throw new Error(data.error||'Request failed')}
+  return data;
 }
-function api(path,opts={}){
-  const h={'Content-Type':'application/json','X-Auth-Token':AUTH,...(opts.headers||{})};
-  return fetch(path,{...opts,headers:h}).then(r=>{if(r.status===401){sessionStorage.removeItem('auth');location.reload()}return r.json()});
+async function restoreSession(){
+  try{await api('/api/session');await init();document.getElementById('login-page').style.display='none';document.getElementById('app-page').style.display='block'}catch{showLogin()}
 }
 function v(id){return document.getElementById(id)?.value||''}
-function esc(s){return(s||'').replace(/</g,'&lt;').replace(/"/g,'&quot;')}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function fmtRp(n){return n?new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',minimumFractionDigits:0}).format(n):'Rp 0'}
 
 async function init(){
   [units,settings,images]=await Promise.all([api('/api/units'),api('/api/settings'),api('/api/images')]);
   renderUnits();renderHomepage();renderMedia();
-  if(getToken())document.getElementById('token-btn').textContent='🔑 Token ✓';
 }
 
 document.querySelectorAll('[data-page]').forEach(a=>{
@@ -222,11 +227,11 @@ function renderUnits(){
   sorted.forEach(u=>{
     const tag=u.tag==='Available'?'<span class="tag tag-avail">Available</span>':'<span class="tag tag-na">Not Available</span>';
     const img0=(u.gambar||[])[0];
-    const price=u.harga?.length>1?`Mulai dari ${fmtRp(Math.min(...u.harga.map(t=>t.amount)))}`:fmtRp(u.harga?.[0]?.amount)+(u.harga?.[0]?.satuan?`/${u.harga[0].satuan}`:'');
+    const price=u.harga?.length>1?`Mulai dari ${fmtRp(Math.min(...u.harga.map(t=>t.amount)))}`:fmtRp(u.harga?.[0]?.amount)+(u.harga?.[0]?.satuan?`/${esc(u.harga[0].satuan)}`:'');
     h+=`<div class="unit-row"><div style="display:flex;align-items:center;gap:1rem">
-      ${img0?`<img src="/img/units/${img0}" class="preview-img">`:''}
-      <div class="unit-info"><strong>${u.judul}</strong> ${tag}<br><small>${u.luas?u.luas+' m² · ':''}${price} · ${u.tamu} tamu · ${(u.gambar||[]).length} foto</small></div></div>
-      <div class="actions"><button class="btn btn-sm" onclick="copyUnit(${u.id})" title="Duplikat">📋</button><button class="btn btn-sm" onclick="editUnit(${u.id})">Edit</button><button class="btn btn-sm btn-danger" onclick="delUnit(${u.id})">Hapus</button></div></div>`;
+      ${img0?`<img src="/img/units/${esc(img0)}" class="preview-img">`:''}
+      <div class="unit-info"><strong>${esc(u.judul)}</strong> ${tag}<br><small>${u.luas?esc(u.luas)+' m² · ':''}${price} · ${esc(u.tamu)} tamu · ${(u.gambar||[]).length} foto</small></div></div>
+      <div class="actions"><button class="btn btn-sm" onclick="copyUnit(${Number(u.id)||0})" title="Duplikat">📋</button><button class="btn btn-sm" onclick="editUnit(${Number(u.id)||0})">Edit</button><button class="btn btn-sm btn-danger" onclick="delUnit(${Number(u.id)||0})">Hapus</button></div></div>`;
   });
   el.innerHTML=h+'</div>';
 }
@@ -236,7 +241,7 @@ const SATUAN_OPTS=['night','month','3 months','6 months','year'];
 function renderTiers(tiers){
   if(!tiers||!tiers.length) tiers=[{amount:0,satuan:'night'}];
   return tiers.map((t,i)=>`<div class="tier-row" style="display:flex;gap:.5rem;align-items:flex-end;margin-bottom:.5rem">
-    <div style="flex:1"><label>${i===0?'Harga':'Harga'} (Rp)</label><input class="tier-amount" type="text" inputmode="numeric" data-raw="${t.amount||0}" placeholder="1.000.000" style="font-variant-numeric:tabular-nums"></div>
+    <div style="flex:1"><label>${i===0?'Harga':'Harga'} (Rp)</label><input class="tier-amount" type="text" inputmode="numeric" data-raw="${esc(t.amount||0)}" placeholder="1.000.000" style="font-variant-numeric:tabular-nums"></div>
     <div style="width:140px"><label>Satuan</label><select class="tier-satuan">${SATUAN_OPTS.map(s=>`<option value="${s}" ${s===t.satuan?'selected':''}>/${s}</option>`).join('')}</select></div>
     ${tiers.length>1?`<button class="btn btn-sm btn-danger" onclick="removeTier(this)" style="margin-bottom:0">×</button>`:''}
   </div>`).join('');
@@ -283,7 +288,7 @@ const KNOWN_RULES=[
   {n:'8 guests maximum',i:'fluent:people-20-regular'},{n:'6 guests maximum',i:'fluent:people-20-regular'},
 ];
 
-function renderIconPreview(ikon){return `<iconify-icon icon="${ikon}" width="16" height="16" style="vertical-align:middle"></iconify-icon>`}
+function renderIconPreview(ikon){ikon=/^[a-z0-9-]+:[a-z0-9-]+$/i.test(ikon||'')?ikon:'mdi:star-outline';return `<iconify-icon icon="${esc(ikon)}" width="16" height="16" style="vertical-align:middle"></iconify-icon>`}
 
 async function pickFromList(title, allItems, selectedKeys) {
   const id='pick-'+Date.now();
@@ -293,7 +298,7 @@ async function pickFromList(title, allItems, selectedKeys) {
     return `<div class="pick-item${sel?' selected':''}" data-key="${esc(key)}" onclick="_pickToggle(this)">
       <input type="checkbox" data-pick value="${esc(it.n)}||${esc(it.i)}" ${sel?'checked':''}>
       <span class="pick-icon">${renderIconPreview(it.i)}</span>
-      <span>${it.n}</span>
+      <span>${esc(it.n)}</span>
     </div>`;
   }).join('');
   const body=`<input class="pick-search" type="text" placeholder="Cari…" oninput="filterPick(this)">
@@ -367,17 +372,17 @@ function copyUnit(id){
     document.querySelectorAll('input[name=imgs]').forEach(c=>{c.checked=(clone.gambar||[]).includes(c.value)});
     // Re-render fitur/fasilitas/rules
     document.getElementById('fitur-list').innerHTML=(clone.fitur||[]).map(f=>`<span class="chip">${esc(f)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fit value="${esc(f)}"></span>`).join('');
-    document.getElementById('fac-list').innerHTML=(clone.fasilitas||[]).map(f=>`<span class="chip">${renderIconPreview(f.ikon)} ${f.nama} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${f.nama}||${f.ikon}"></span>`).join('');
-    document.getElementById('rule-list').innerHTML=(clone.rules||[]).map(r=>`<span class="chip">${renderIconPreview(r.ikon)} ${r.aturan} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rn data-ri value="${r.aturan}||${r.ikon}"></span>`).join('');
+    document.getElementById('fac-list').innerHTML=(clone.fasilitas||[]).map(f=>`<span class="chip">${renderIconPreview(f.ikon)} ${esc(f.nama)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${esc(f.nama)}||${esc(f.ikon)}"></span>`).join('');
+    document.getElementById('rule-list').innerHTML=(clone.rules||[]).map(r=>`<span class="chip">${renderIconPreview(r.ikon)} ${esc(r.aturan)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rn data-ri value="${esc(r.aturan)}||${esc(r.ikon)}"></span>`).join('');
   },50);
 }
 
 function editUnit(id){
   const u=id?units.find(x=>x.id===id):{id:0,judul:'',fitur:[],desc:'',detail:'',harga:0,satuan:'malam',tamu:'',tag:'Available',gambar:[],fasilitas:[],rules:[],order:[{detail:'Whatsapp',link:`https://wa.me/${settings.site?.whatsapp||''}`,ikon:'la:whatsapp'}]};
-  const imgChecks=images.map(f=>`<label><input type="checkbox" name="imgs" value="${f}" ${(u.gambar||[]).includes(f)?'checked':''}><img src="/img/units/${f}"></label>`).join('');
+  const imgChecks=images.map(f=>`<label><input type="checkbox" name="imgs" value="${esc(f)}" ${(u.gambar||[]).includes(f)?'checked':''}><img src="/img/units/${esc(f)}"></label>`).join('');
   const fiturChips=(u.fitur||[]).map(f=>`<span class="chip">${esc(f)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fit value="${esc(f)}"></span>`).join('');
-  const facs=(u.fasilitas||[]).map(f=>`<span class="chip">${renderIconPreview(f.ikon)} ${f.nama} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${f.nama}||${f.ikon}"></span>`).join('');
-  const rls=(u.rules||[]).map(r=>`<span class="chip">${renderIconPreview(r.ikon)} ${r.aturan} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rn data-ri value="${r.aturan}||${r.ikon}"></span>`).join('');
+  const facs=(u.fasilitas||[]).map(f=>`<span class="chip">${renderIconPreview(f.ikon)} ${esc(f.nama)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-fn data-fi value="${esc(f.nama)}||${esc(f.ikon)}"></span>`).join('');
+  const rls=(u.rules||[]).map(r=>`<span class="chip">${renderIconPreview(r.ikon)} ${esc(r.aturan)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rn data-ri value="${esc(r.aturan)}||${esc(r.ikon)}"></span>`).join('');
 
   document.getElementById('page-units').innerHTML=`<div class="card">
     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem">
@@ -385,7 +390,7 @@ function editUnit(id){
       <h2 style="margin:0">${id?'Edit':'Tambah'} Unit</h2>
     </div>
     <div class="field"><label>Judul</label><input id="fu-judul" value="${esc(u.judul)}"></div>
-    <div class="row"><div class="field"><label>Luas (m²)</label><input id="fu-luas" type="number" min="0" value="${u.luas||''}" placeholder="90"></div><div class="field"><label>Tamu</label><input id="fu-tamu" type="number" value="${u.tamu}"></div>
+    <div class="row"><div class="field"><label>Luas (m²)</label><input id="fu-luas" type="number" min="0" value="${esc(u.luas)}" placeholder="90"></div><div class="field"><label>Tamu</label><input id="fu-tamu" type="number" value="${esc(u.tamu)}"></div>
     <div class="field"><label>Status</label><select id="fu-tag"><option ${u.tag==='Available'?'selected':''}>Available</option><option ${u.tag==='Not Available'?'selected':''}>Not Available</option></select></div></div>
     <div class="section-title">Harga <button class="btn btn-sm" onclick="addTier()">+ Tambah Tier</button></div>
     <div id="tier-list">${renderTiers(u.harga)}</div>
@@ -401,7 +406,7 @@ function editUnit(id){
     <div class="section-title">House Rules <button class="btn btn-sm" onclick="pickRule()">+ Pilih / Tambah</button></div>
     <div id="rule-list">${rls}</div>
     <div style="margin-top:1.5rem;display:flex;gap:.5rem">
-      <button class="btn btn-accent" onclick="saveUnit(${id})">Simpan</button>
+      <button class="btn btn-accent" onclick="saveUnit(${Number(id)||0})">Simpan</button>
       <button class="btn" onclick="renderUnits()">Batal</button>
     </div></div>`;
   // Bind price formatters on all tier inputs
@@ -411,7 +416,7 @@ function editUnit(id){
   if(iu) iu.addEventListener('change',async e=>{
     if(!e.target.files.length)return;
     const fd=new FormData();for(const f of e.target.files) fd.append('files',f,f.name);
-    await fetch('/api/upload',{method:'POST',headers:{'X-Auth-Token':AUTH},body:fd});
+    await api('/api/upload',{method:'POST',body:fd});
     images=await api('/api/images');
     editUnit(id);
   });
@@ -442,7 +447,7 @@ function getManualItems(listId, knownSet){
 function renderChips(listId, items, tag1, tag2){
   document.getElementById(listId).innerHTML=items.map(v=>{
     const[n,i]=v.split('||');
-    return `<span class="chip">${renderIconPreview(i)} ${n} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-${tag1}n data-${tag1}i value="${n}||${i}"></span>`;
+    return `<span class="chip">${renderIconPreview(i)} ${esc(n)} <button onclick="this.parentElement.remove()">×</button><input type="hidden" data-${tag1}n data-${tag1}i value="${esc(n)}||${esc(i)}"></span>`;
   }).join('');
 }
 function knownSet(items){return new Set(items.map(it=>it.n+'||'+it.i))}
@@ -510,10 +515,10 @@ async function delUnit(id){
 // ── HOMEPAGE PAGE ──
 function renderHomepage(){
   const s=settings, el=document.getElementById('page-homepage');
-  const nearby=(s.location?.nearby||[]).map(t=>`<span class="chip">${t}<button onclick="this.parentElement.remove()">×</button></span>`).join('');
-  const reviews=(s.reviews||[]).map(r=>`<span class="chip">${esc(r.author)}: ${esc(r.text).slice(0,30)}…<button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rv value="${esc(r.text)}||${esc(r.author)}"></span>`).join('');
-  const imgOpts=images.map(f=>`<option value="${f}" ${f===s.hero?.coverImage?'selected':''}>${f}</option>`).join('');
-  const imgOpts2=images.map(f=>`<option value="${f}" ${f===s.about?.image?'selected':''}>${f}</option>`).join('');
+  const nearby=(s.location?.nearby||[]).map(t=>`<span class="chip">${esc(t)}<button onclick="this.parentElement.remove()">×</button></span>`).join('');
+  const reviews=(s.reviews||[]).map(r=>`<span class="chip">${esc(r.author)}: ${esc(r.text.slice(0,30))}…<button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rv value="${esc(r.text)}||${esc(r.author)}"></span>`).join('');
+  const imgOpts=images.map(f=>`<option value="${esc(f)}" ${f===s.hero?.coverImage?'selected':''}>${esc(f)}</option>`).join('');
+  const imgOpts2=images.map(f=>`<option value="${esc(f)}" ${f===s.about?.image?'selected':''}>${esc(f)}</option>`).join('');
   el.innerHTML=`<h2 style="margin-bottom:1.25rem">Pengaturan Homepage</h2>
     <div class="card"><h2>🌐 Site Info</h2>
       <div class="row"><div class="field"><label>Nama Situs</label><input id="hs-name" value="${esc(s.site?.name)}"></div>
@@ -546,24 +551,24 @@ function renderHomepage(){
     </div>
     <button class="btn btn-accent" onclick="saveSettings()">Simpan Semua Pengaturan</button>`;
 }
-async function addNearby(){const n=await mPrompt('Tempat Terdekat','contoh: 5 menit ke UGM');if(n)document.getElementById('hl-nearby').innerHTML+=`<span class="chip">${n}<button onclick="this.parentElement.remove()">×</button></span>`}
+async function addNearby(){const n=await mPrompt('Tempat Terdekat','contoh: 5 menit ke UGM');if(n)document.getElementById('hl-nearby').innerHTML+=`<span class="chip">${esc(n)}<button onclick="this.parentElement.remove()">×</button></span>`}
 async function addReview(){
   const r=await mPromptMulti([{id:'author',label:'Nama Reviewer',title:'Tambah Review',placeholder:'Agung'},{id:'text',label:'Isi Review',placeholder:'Comfy place to stay!'}]);
   if(!r||!r.author||!r.text)return;
-  document.getElementById('hr-list').innerHTML+=`<span class="chip">${r.author}: ${r.text.slice(0,30)}…<button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rv value="${esc(r.text)}||${esc(r.author)}"></span>`;
+  document.getElementById('hr-list').innerHTML+=`<span class="chip">${esc(r.author)}: ${esc(r.text.slice(0,30))}…<button onclick="this.parentElement.remove()">×</button><input type="hidden" data-rv value="${esc(r.text)}||${esc(r.author)}"></span>`;
 }
 async function saveSettings(){
-  const s={site:{name:v('hs-name'),whatsapp:v('hs-wa'),email:v('hs-email'),airbnbUrl:v('hs-airbnb')},hero:{title:v('hh-title'),subtitle:v('hh-sub'),coverImage:v('hh-img')},about:{text:v('ha-text'),image:v('ha-img')},location:{address:v('hl-addr'),mapEmbed:v('hl-map'),nearby:[...document.querySelectorAll('#hl-nearby .chip')].map(c=>c.childNodes[0].textContent.trim())},reviews:[...document.querySelectorAll('#hr-list input[data-rv]')].map(h=>{const[t,a]=h.value.split('||');return{text:t,author:a}}),footer:{warning:v('hf-warn')}};
-  await api('/api/settings',{method:'PUT',body:JSON.stringify(s)});settings=s;await mAlert('Pengaturan tersimpan!');
+  const s={...settings,site:{name:v('hs-name'),whatsapp:v('hs-wa'),email:v('hs-email'),airbnbUrl:v('hs-airbnb')},hero:{title:v('hh-title'),subtitle:v('hh-sub'),coverImage:v('hh-img')},about:{text:v('ha-text'),image:v('ha-img')},location:{address:v('hl-addr'),mapEmbed:v('hl-map'),nearby:[...document.querySelectorAll('#hl-nearby .chip')].map(c=>c.childNodes[0].textContent.trim())},reviews:[...document.querySelectorAll('#hr-list input[data-rv]')].map(h=>{const[t,a]=h.value.split('||');return{text:t,author:a}}),footer:{warning:v('hf-warn')}};
+  settings=await api('/api/settings',{method:'PUT',body:JSON.stringify(s)});await mAlert('Pengaturan tersimpan!');
 }
 
 // ── MEDIA PAGE ──
 function renderMedia(){
   const el=document.getElementById('page-media');
   const imgs=images.map(f=>`<div style="position:relative;display:inline-block;margin:4px">
-    <img src="/img/units/${f}" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
-    <button onclick="delImg('${f}')" style="position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:.7rem;cursor:pointer;line-height:1">×</button>
-    <div style="font-size:.65rem;color:var(--muted);text-align:center;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f}</div></div>`).join('');
+    <img src="/img/units/${esc(f)}" style="width:100px;height:100px;object-fit:cover;border-radius:8px;border:1px solid var(--border)">
+    <button data-image="${esc(f)}" onclick="delImg(this.dataset.image)" style="position:absolute;top:-6px;right:-6px;background:var(--danger);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:.7rem;cursor:pointer;line-height:1">×</button>
+    <div style="font-size:.65rem;color:var(--muted);text-align:center;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(f)}</div></div>`).join('');
   el.innerHTML=`<h2 style="margin-bottom:1.25rem">Media Library</h2>
     <div class="card"><div class="dropzone" id="dz">
       <div style="font-size:2rem;margin-bottom:.5rem">📁</div>
@@ -582,7 +587,7 @@ function renderMedia(){
 async function uploadFiles(fileList){
   const fd=new FormData();for(const f of fileList) fd.append('files',f,f.name);
   document.getElementById('upload-status').innerHTML='⏳ Mengupload…';
-  await fetch('/api/upload',{method:'POST',headers:{'X-Auth-Token':AUTH},body:fd});
+  await api('/api/upload',{method:'POST',body:fd});
   images=await api('/api/images');
   document.getElementById('upload-status').innerHTML=`✅ Terupload`;renderMedia();renderUnits();
 }
@@ -593,19 +598,18 @@ async function delImg(name){
 }
 
 // ── DEPLOY ──
-function getToken(){return localStorage.getItem('gh_token')||''}
-async function setupToken(){const t=await mPrompt('GitHub Personal Access Token','ghp_...',getToken());if(t){localStorage.setItem('gh_token',t);document.getElementById('token-btn').textContent='🔑 Token ✓'}}
 async function deployLive(){
-  const token=getToken();if(!token){setupToken();return}
   const btn=document.getElementById('deploy-btn'),toast=document.getElementById('deploy-toast');
-  btn.disabled=true;btn.textContent='⏳ Deploying…';toast.style.display='block';toast.innerHTML='⏳ Committing & deploying…';
+  btn.disabled=true;btn.textContent='⏳ Deploying…';toast.style.display='block';toast.textContent='⏳ Committing & deploying…';
   try{
-    const data=await api('/api/deploy',{method:'POST',body:JSON.stringify({token})});
-    if(data.ok){toast.innerHTML='✅ <strong>Deployed!</strong><br><small style="color:#aaa">Live di paviliun900.com</small>';setTimeout(()=>toast.style.display='none',5000)}
-    else{toast.innerHTML=`❌ <strong>Gagal</strong><br><pre style="font-size:.7rem;max-height:150px;overflow:auto;color:#ff6b6b">${(data.log||[]).join('\n')}</pre>`}
-  }catch(e){toast.innerHTML=`❌ ${e.message}`}
-  btn.disabled=false;btn.textContent='🚀 Deploy ke Live';
+    await api('/api/deploy',{method:'POST',body:JSON.stringify({})});
+    toast.textContent='✅ Deployed! Live di paviliun900.com';
+    setTimeout(()=>toast.style.display='none',5000);
+  }catch(e){toast.textContent='❌ '+e.message}
+  finally{btn.disabled=false;btn.textContent='🚀 Deploy ke Live'}
 }
+window.addEventListener('unhandledrejection',event=>{event.preventDefault();mAlert(event.reason?.message||'Request failed')});
+restoreSession();
 </script>
 </body>
 </html>
