@@ -40,7 +40,7 @@ const mapLink = computed(() => `https://www.google.com/maps/search/?api=1&query=
 .nearby-groups { display: grid; grid-template-columns: 1fr 1.1fr 1fr; margin-top: 52px; }
 .nearby-group { padding-right: 30px; }
 .nearby-group + .nearby-group { border-left: 1px solid var(--line); padding-left: 40px; }
-.nearby-group h3 { font-family: var(--display-font); font-weight: 400; font-size: 28px; margin: 0 0 18px; }
+.nearby-group h3 { font-family: var(--display-font); font-weight:400; font-size: 28px; margin: 0 0 18px; }
 .nearby-group ul { list-style: none; padding: 0; margin: 0; }
 .nearby-group li { font-size: 14px; color: var(--muted); line-height: 1.75; margin: 0 0 12px; }
 @media (max-width: 700px) { .location-top { grid-template-columns: 1fr; gap: 30px; } .location-map { height: 300px; } .nearby-groups { grid-template-columns: 1fr; gap: 25px; margin-top: 32px; } .nearby-group { padding: 0; } .nearby-group + .nearby-group { border-left: 0; border-top: 1px solid var(--line); padding: 25px 0 0; } }

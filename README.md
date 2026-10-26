@@ -54,7 +54,7 @@ Content and prices still come from `src/data/settings.json` and
 room filters use only explicitly classified images.
 
 Run `npm run dev` for a local preview. Finite entrance/reveal animations respect
-the visitor's reduced-motion preference. Bodoni Moda and DM Sans are self-hosted
+the visitor's reduced-motion preference. Lora Regular and DM Sans are self-hosted
 under `public/fonts/`, with their SIL Open Font License files included alongside
 them. These freely licensed fonts substitute for the commercial mockup fonts.
 Design references and captured previews live in the ignored `design-mockups/`

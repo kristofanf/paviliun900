@@ -43,7 +43,7 @@ function move(direction) { activeIndex.value = (activeIndex.value + direction + 
 .review-pair { display: grid; grid-template-columns: 1fr 1fr; min-height: 200px; animation: story-in 250ms ease-out; }
 .review { margin: 0; padding: 15px 28px 0 0; }
 .review + .review { border-left: 1px solid var(--line); padding-left: 28px; padding-right: 0; }
-.review blockquote { font-family: var(--display-font); font-size: 22px; color: var(--muted); line-height: 1.5; margin: 0; }
+.review blockquote { font-family: var(--display-font);font-weight:400; font-size: 22px; color: var(--muted); line-height: 1.5; margin: 0; }
 .review figcaption { margin-top: 18px; display: flex; gap: 14px; color: var(--muted); font-size: 14px; }
 @keyframes story-in { from { opacity: .5; } to { opacity: 1; } }
 @media (max-width: 800px) { .stories-grid { grid-template-columns: 1fr; gap: 28px; } }

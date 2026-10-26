@@ -63,7 +63,7 @@ function back() { router.push({ name: 'detail', params: { id: detailUnit.value.i
 .gallery-hero-inner { position: relative; z-index: 1; height: 100%; display: flex; flex-direction: column; padding-top: 138px; padding-bottom: 44px; color: white; }
 .gallery-hero-content { margin-top: auto; display: grid; grid-template-columns: 1.35fr 1fr; gap: 50px; align-items: end; }
 .gallery-hero-content h1 { font-size: clamp(70px, 7.2vw, 112px); line-height: 1.05; margin: 0; letter-spacing: -.04em; }
-.gallery-hero-content h2 { font-family: var(--display-font); font-weight: 400; font-size: clamp(24px, 2.5vw, 37px); line-height: 1.3; margin: 0 0 12px; }
+.gallery-hero-content h2 { font-family: var(--display-font); font-weight:400; font-size: clamp(24px, 2.5vw, 37px); line-height: 1.3; margin: 0 0 12px; }
 .gallery-hero-content p { margin: 0 0 9px; font-size: 18px; }
 .gallery-section { padding-block: 30px 80px; }
 .photo-filters { display: flex; flex-wrap: wrap; gap: 8px 34px; margin-bottom: 24px; }

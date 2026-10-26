@@ -33,13 +33,13 @@ const facts = computed(() => (props.unit.fitur || []).filter(item => !/wi-?fi/i.
 .photo-placeholder { display: grid; place-items: center; width: 100%; aspect-ratio: 1.1; background: #eeeeea; color: var(--muted); font-size: 15px; }
 .unit-photo img { display: block; width: 100%; height: auto; aspect-ratio: 1.1; object-fit: cover; transition: transform 450ms var(--ease); }
 .unit-photo:hover img, .unit-photo:focus-visible img { transform: scale(1.025); }
-.unit-title { margin: 20px 0 15px; font-family: var(--display-font); font-size: clamp(26px, 2.35vw, 34px); font-weight: 400; line-height: 1.12; letter-spacing: -.035em; }
+.unit-title { margin: 20px 0 15px; font-family: var(--display-font); font-size: clamp(26px, 2.35vw, 34px); font-weight:400; line-height: 1.12; letter-spacing: -.035em; }
 .unit-title a { color: inherit; text-decoration: none; }
 .unit-title a:hover { text-decoration: underline; text-underline-offset: 5px; }
 .unit-facts { display: flex; gap: 8px 15px; flex-wrap: wrap; list-style: none; padding: 0; margin: 0 0 19px; font-size: 14px; color: var(--muted); }
 .unit-facts li + li { border-left: 1px solid var(--line); padding-left: 15px; }
 .unit-status { font-size: 15px; color: var(--muted); margin: 0 0 5px; }
-.unit-price { font-family: var(--display-font); font-size: clamp(28px, 2.8vw, 40px); line-height: 1.2; margin: 0 0 20px; letter-spacing: -.04em; }
+.unit-price { font-family: var(--display-font);font-weight:400; font-size: clamp(28px, 2.8vw, 40px); line-height: 1.2; margin: 0 0 20px; letter-spacing: -.04em; }
 .unit-price span { font-size: .62em; letter-spacing: -.015em; }
 .other-prices, .unit-description { color: var(--muted); font-size: 15px; line-height: 1.7; margin-bottom: 24px; }
 .featured-unit { display: grid; grid-template-columns: 1.55fr 1fr; gap: 48px; align-items: center; }

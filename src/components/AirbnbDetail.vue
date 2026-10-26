@@ -69,9 +69,9 @@ function openGallery() { router.push({ name: 'image', params: { id: detailUnit.v
 .long-term-hero .detail-heading .display-title { font-size: clamp(64px, 6.1vw, 94px); }
 .detail-title { font-size: clamp(20px, 2.1vw, 30px); line-height: 1.35; margin: 0; }
 .detail-facts { font-size: 14px; line-height: 1.7; margin: 0 0 22px; }
-.availability { font-family: var(--display-font); font-size: 29px; margin: 0 0 5px; }
+.availability { font-family: var(--display-font);font-weight:400; font-size: 29px; margin: 0 0 5px; }
 .availability-note { font-size: 14px; margin: 0 0 24px; }
-.hero-price { font-family: var(--display-font); font-size: 34px; margin: 0 0 20px; white-space: nowrap; }
+.hero-price { font-family: var(--display-font);font-weight:400; font-size: 34px; margin: 0 0 20px; white-space: nowrap; }
 .hero-price span { font-size: 18px; }
 .detail-enquiry { width: 100%; margin: 6px 0; }
 .hero-photo-link { display: flex; align-items: center; gap: 12px; margin-top: 16px; color: white; }

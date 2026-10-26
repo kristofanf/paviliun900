@@ -43,7 +43,7 @@ const periodLabel = period => period === 'year' ? 'Yearly' : period === 'month' 
 
 <style scoped>
 .stays-heading { margin-bottom: 40px; }
-.rental-intro { font-family: var(--display-font); font-size: clamp(23px, 2.2vw, 32px); margin: 12px 0 30px; line-height: 1.35; }
+.rental-intro { font-family: var(--display-font);font-weight:400; font-size: clamp(23px, 2.2vw, 32px); margin: 12px 0 30px; line-height: 1.35; }
 .period-options { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 42px; }
 .period-options button { min-width: 148px; border: 1px solid #aaa; border-radius: 4px; padding: 14px 26px; font: inherit; font-size: 15px; color: var(--ink); background: transparent; cursor: pointer; }
 .period-options button[aria-pressed='true'] { background: var(--ink); color: white; border-color: var(--ink); }
@@ -52,7 +52,7 @@ const periodLabel = period => period === 'year' ? 'Yearly' : period === 'month' 
 .rental-grid.expanded-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .rental-grid.expanded-grid > :nth-child(even) { padding-top: 0; }
 .availability-note { margin-top: 65px; padding-top: 38px; border-top: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-.availability-note p { font-family: var(--display-font); font-size: clamp(25px, 2.7vw, 38px); line-height: 1.2; margin: 0; }
+.availability-note p { font-family: var(--display-font);font-weight:400; font-size: clamp(25px, 2.7vw, 38px); line-height: 1.2; margin: 0; }
 .availability-note a { flex-shrink: 0; }
 @media (max-width: 1100px) { .rental-grid.expanded-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 700px) { .rental-grid, .rental-grid.expanded-grid { grid-template-columns: 1fr; gap: 44px; } .rental-grid > :nth-child(even) { padding-top: 0; } .period-options { gap: 8px; } .period-options button { min-width: 0; flex: 1; padding: 12px 10px; } .stays-heading { margin-bottom: 26px; } .availability-note { flex-direction: column; align-items: start; margin-top: 40px; gap: 20px; } }
