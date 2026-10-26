@@ -9,11 +9,14 @@ let animation
 onMounted(() => {
   const media = window.matchMedia('(prefers-reduced-motion: reduce)')
   if (media.matches || !('IntersectionObserver' in window)) return
-  const stopOnPreference = () => { if (media.matches) { observer?.disconnect(); animation?.cancel() } }
+  const stopOnPreference = () => { if (media.matches) { observer?.disconnect(); animation?.cancel(); show() } }
   media.addEventListener('change', stopOnPreference)
   removePreferenceListener = () => media.removeEventListener('change', stopOnPreference)
+  // Hide until the fade starts, so the visible edge does not blink when it begins.
+  element.value.style.opacity = '0'
   observer = new IntersectionObserver(entries => {
     if (!entries[0].isIntersecting) return
+    show()
     animation = element.value?.animate(
       [{ opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'translateY(0)' }],
       { duration: 700, easing: 'cubic-bezier(.16,1,.3,1)' },
@@ -23,6 +26,7 @@ onMounted(() => {
   observer.observe(element.value)
 })
 let removePreferenceListener
+function show() { if (element.value) element.value.style.opacity = '' }
 onBeforeUnmount(() => { observer?.disconnect(); animation?.cancel(); removePreferenceListener?.() })
 </script>
 

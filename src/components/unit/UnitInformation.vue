@@ -1,11 +1,11 @@
 <script setup>
 import { computed, shallowRef, watch } from 'vue'
 import { formatRupiah } from '@/utils/format'
-import { isNightly, rentalPeriods } from '@/utils/property'
+import { isNightly, rentalPeriods, tierFor } from '@/utils/property'
 import RevealBlock from '@/components/shared/RevealBlock.vue'
 const props = defineProps({ unit: { type: Object, required: true } })
 const selected = shallowRef('')
-const tiers = computed(() => rentalPeriods([props.unit]).map(period => props.unit.harga.find(tier => tier.satuan === period)))
+const tiers = computed(() => rentalPeriods([props.unit]).map(period => tierFor(props.unit, period)))
 watch(() => props.unit.id, () => { selected.value = props.unit.harga?.[0]?.satuan || '' }, { immediate: true })
 // Source icon systems mapped to the locally bundled MDI font.
 const icons = { 'mdi:bed-outline': 'bed-outline', 'teenyicons:bath-outline': 'shower', 'fa6-solid:kitchen-set': 'silverware-fork-knife', 'iconoir:wifi': 'wifi', 'tabler:air-conditioning': 'snowflake', 'fluent:washer-24-regular': 'washing-machine', 'ph:car': 'car-outline', 'material-symbols:water-heater-outline': 'water-thermometer-outline', 'ep:refrigerator': 'fridge-outline', 'material-symbols:microwave-outline': 'microwave', 'mdi:no-smoking': 'smoking-off', 'icon-park-outline:check-in': 'clock-outline', 'ri:time-line': 'clock-outline', 'fluent:people-20-regular': 'account-group-outline' }

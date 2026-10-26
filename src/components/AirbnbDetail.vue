@@ -2,15 +2,15 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import units from '@/data/units.json'
-import { categoryForPhoto, imgUrl, isNightly, primaryPhoto } from '@/utils/property'
+import { categoryForPhoto, imgUrl, nightlyTier as findNightlyTier, primaryPhoto } from '@/utils/property'
 import { formatRupiah } from '@/utils/format'
 import UnitInformation from '@/components/unit/UnitInformation.vue'
 import { findUnitByRoute, unitSlug } from '@/utils/unit-slug'
 const route = useRoute()
 const router = useRouter()
 const detailUnit = computed(() => findUnitByRoute(units, route.params.slug))
-const nightly = computed(() => detailUnit.value && isNightly(detailUnit.value))
-const nightlyTier = computed(() => detailUnit.value?.harga?.find(tier => ['night', 'malam'].includes(tier.satuan)))
+const nightlyTier = computed(() => findNightlyTier(detailUnit.value))
+const nightly = computed(() => Boolean(nightlyTier.value))
 const photos = computed(() => (detailUnit.value?.gambar || []).filter(Boolean))
 const heroPhoto = computed(() => photos.value.find(name => categoryForPhoto(name) === 'Living & dining') || primaryPhoto(detailUnit.value))
 const previewPhotos = computed(() => {

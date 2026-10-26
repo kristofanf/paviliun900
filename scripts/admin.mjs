@@ -185,8 +185,10 @@ export function createAdminApp({ root = ROOT, password = process.env.ADMIN_PASS,
       step = 'push source'; runCommand('git', ['push', 'origin', 'master'])
       step = 'build and publish'; runCommand('npm', ['run', 'deploy'])
       res.json({ ok: true })
-    } catch {
-      // Command stderr can contain credential-bearing URLs. Keep it out of API responses.
+    } catch (error) {
+      // Command stderr can contain credential-bearing URLs. Keep it out of API responses;
+      // the CMS listens only on loopback, so its own terminal may show it.
+      console.error(`Deployment failed during: ${step}\n${error.stderr?.trim() || error.message}`)
       res.status(500).json({ ok: false, error: `Deployment failed during: ${step}` })
     }
   })

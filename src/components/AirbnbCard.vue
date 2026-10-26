@@ -1,7 +1,7 @@
 <script setup>
 import { computed, shallowRef } from 'vue'
 import units from '@/data/units.json'
-import { isNightly, rentalPeriods, whatsappUrl } from '@/utils/property'
+import { isNightly, nightlyTier, rentalPeriods, whatsappUrl } from '@/utils/property'
 import HomeUnitPreview from './HomeUnitPreview.vue'
 import RevealBlock from '@/components/shared/RevealBlock.vue'
 
@@ -17,7 +17,7 @@ const periodLabel = period => period === 'year' ? 'Yearly' : period === 'month' 
     <section id="short-stays" class="short-stays" aria-label="Short stays">
       <RevealBlock>
         <h2 class="section-title stays-heading">A few nights, a place of your own.</h2>
-        <HomeUnitPreview v-for="unit in shortStays" :key="unit.id" :unit="unit" :period="unit.harga.find(tier => ['night', 'malam'].includes(tier.satuan))?.satuan" featured />
+        <HomeUnitPreview v-for="unit in shortStays" :key="unit.id" :unit="unit" :period="nightlyTier(unit)?.satuan" featured />
       </RevealBlock>
     </section>
     <section id="long-stays" class="long-stays section-space" aria-label="Long-term living">

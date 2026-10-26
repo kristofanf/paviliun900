@@ -19,5 +19,9 @@ export function deployStatic({ root = ROOT, runCommand = createCommandRunner(roo
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try { deployStatic(); console.log('Static site published.') }
-  catch { console.error('Static site deployment failed. Check the build and configured Git credentials.'); process.exitCode = 1 }
+  catch (error) {
+    console.error(error.stderr?.trim() || error.message)
+    console.error('Static site deployment failed. Check the build and configured Git credentials.')
+    process.exitCode = 1
+  }
 }

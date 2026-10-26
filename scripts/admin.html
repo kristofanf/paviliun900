@@ -488,12 +488,18 @@ async function pickRule(){
   renderChips('rule-list', [...manual,...picked], 'r', 'r');
 }
 
+// Booking links have no editor, so WhatsApp links follow the number in Settings.
+function currentWhatsapp(link){
+  const number=settings.site?.whatsapp;
+  return number?link.replace(/^https:\/\/wa\.me\/\d*/,`https://wa.me/${number}`):link;
+}
+
 async function saveUnit(id){
   const imgs=[...document.querySelectorAll('input[name=imgs]:checked')].map(c=>c.value);
   const fitur=[...document.querySelectorAll('#fitur-list input[data-fit]')].map(h=>h.value);
   const facs=[...document.querySelectorAll('#fac-list input')].map(h=>{const[n,i]=h.value.split('||');return{nama:n,ikon:i}});
   const rls=[...document.querySelectorAll('#rule-list input')].map(h=>{const[n,i]=h.value.split('||');return{aturan:n,ikon:i}});
-  const body={judul:v('fu-judul'),luas:parseInt(v('fu-luas'))||'',fitur,desc:v('fu-desc'),detail:v('fu-detail'),harga:collectTiers(),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:structuredClone(editingUnitOrder)};
+  const body={judul:v('fu-judul'),luas:parseInt(v('fu-luas'))||'',fitur,desc:v('fu-desc'),detail:v('fu-detail'),harga:collectTiers(),tamu:v('fu-tamu'),tag:v('fu-tag'),gambar:imgs,fasilitas:facs,rules:rls,order:editingUnitOrder.map(o=>({...o,link:currentWhatsapp(o.link)}))};
   if(id){await api(`/api/units/${id}`,{method:'PUT',body:JSON.stringify(body)})}
   else{await api('/api/units',{method:'POST',body:JSON.stringify(body)})}
   units=await api('/api/units');

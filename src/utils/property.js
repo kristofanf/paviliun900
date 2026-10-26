@@ -9,8 +9,12 @@ export function primaryPhoto(unit) {
   return unit?.gambar?.includes(cleanPhoto) ? cleanPhoto : unit?.gambar?.[0] || ''
 }
 
+export function nightlyTier(unit) {
+  return unit?.harga?.find(tier => ['night', 'malam'].includes(tier.satuan))
+}
+
 export function isNightly(unit) {
-  return unit.harga?.some(tier => ['night', 'malam'].includes(tier.satuan))
+  return Boolean(nightlyTier(unit))
 }
 
 export function tierFor(unit, period) {

@@ -97,6 +97,23 @@ for (const mode of ['edit', 'copy', 'new']) {
   })
 }
 
+test('saving a Unit moves its WhatsApp booking link to the current Settings number', async ({ page }) => {
+  const admin = await fixture()
+  try {
+    await admin.login()
+    const settings = await (await admin.request('/api/settings')).json()
+    await admin.request('/api/settings', { method: 'PUT', body: JSON.stringify({ site: { ...settings.site, whatsapp: '6281111111111' } }) })
+    const booking = [{ detail: 'Whatsapp', link: 'https://wa.me/6285888815722?text=Halo', ikon: 'la:whatsapp' }, { detail: 'Book direct', link: 'https://example.com/booking', ikon: 'mdi:calendar' }]
+    await admin.request('/api/units/1', { method: 'PUT', body: JSON.stringify({ order: booking }) })
+    await openAdmin(page, admin)
+    await page.evaluate(() => editUnit(1))
+    await page.getByRole('button', { name: 'Simpan', exact: true }).click()
+    await expect(page.locator('#fu-judul')).toHaveCount(0)
+    const saved = (await (await admin.request('/api/units')).json()).find(u => u.id === 1)
+    expect(saved.order.map(o => o.link)).toEqual(['https://wa.me/6281111111111?text=Halo', 'https://example.com/booking'])
+  } finally { await admin.close() }
+})
+
 test('failed photo uploads leave the draft editable', async ({ page }) => {
   const admin = await fixture()
   try {
