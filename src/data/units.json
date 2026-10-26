@@ -1,6 +1,7 @@
 [
   {
     "id": 1,
+    "slug": "spacious-and-comfortable-airbnb",
     "judul": "Spacious and Comfortable Airbnb",
     "fitur": [
       "4 Bedrooms",
@@ -105,6 +106,7 @@
   },
   {
     "id": 2,
+    "slug": "exclusive-and-strategic-apartment",
     "judul": "Exclusive and Strategic Apartment",
     "fitur": [
       "3 Bedrooms",
@@ -286,6 +288,7 @@
       }
     ],
     "id": 1786879207151,
+    "slug": "a21-unit-compact-modern",
     "luas": 55
   }
 ]

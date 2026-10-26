@@ -159,6 +159,21 @@ test('unit edits preserve IDs and reject invalid content without changing data',
   assert.equal((await f.request('/api/units/' + first.id, json({ judul: first.judul }))).status, 200)
 })
 
+test('CMS creates unique text slugs and preserves existing URLs when titles change', async t => {
+  const f = await setup(t)
+  await f.login()
+  const original = (await (await f.request('/api/units')).json())[0]
+  const updated = await f.request('/api/units/' + original.id, json({ judul: 'A new name', slug: 'do-not-replace-the-url' }))
+  assert.equal(updated.status, 200)
+  assert.equal((await updated.json()).slug, original.slug)
+  for (let i = 0; i < 2; i++) {
+    const response = await f.request('/api/units', { method: 'POST', body: JSON.stringify({ ...original, slug: '../unsafe' }) })
+    assert.equal(response.status, 200)
+  }
+  const units = await (await f.request('/api/units')).json()
+  assert.deepEqual(units.slice(-2).map(unit => unit.slug), [original.slug + '-2', original.slug + '-3'])
+})
+
 test('deploy rejects browser tokens before invoking a command', async t => {
   const commands = []
   const f = await setup(t, { runCommand: (...args) => { commands.push(args); return '' } })

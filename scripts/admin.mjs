@@ -5,6 +5,7 @@ import { readFileSync, writeFileSync, existsSync, readdirSync, unlinkSync, mkdir
 import { join, resolve, extname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createCommandRunner } from './commands.mjs'
+import { createUnitSlug, unitSlug } from '../src/utils/unit-slug.js'
 
 const ROOT = fileURLToPath(new URL('..', import.meta.url))
 const COOKIE = 'paviliun_session'
@@ -125,7 +126,8 @@ export function createAdminApp({ root = ROOT, password = process.env.ADMIN_PASS,
   app.post('/api/units', (req, res) => {
     if (!validUnit(req.body)) return res.status(400).json({ error: 'Invalid unit data' })
     const units = readJSON(DATA)
-    units.push({ ...req.body, id: Math.max(Date.now(), ...units.map(u => u.id + 1)) })
+    const slug = createUnitSlug(req.body.judul, units.map(unit => unitSlug(unit, units)))
+    units.push({ ...req.body, slug, id: Math.max(Date.now(), ...units.map(u => u.id + 1)) })
     writeJSON(DATA, units)
     res.json({ ok: true })
   })
@@ -133,7 +135,7 @@ export function createAdminApp({ root = ROOT, password = process.env.ADMIN_PASS,
     const units = readJSON(DATA)
     const idx = units.findIndex(u => u.id === Number(req.params.id))
     if (idx === -1) return res.status(404).json({ error: 'Not found' })
-    const unit = { ...units[idx], ...req.body, id: units[idx].id }
+    const unit = { ...units[idx], ...req.body, id: units[idx].id, slug: unitSlug(units[idx], units) }
     if (!validUnit(unit)) return res.status(400).json({ error: 'Invalid unit data' })
     units[idx] = unit
     writeJSON(DATA, units)

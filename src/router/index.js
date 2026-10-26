@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '@/views/HomeView.vue'
 import units from '@/data/units.json'
+import { findUnitByRoute, unitSlug } from '@/utils/unit-slug'
 
 const routes = [
   {
@@ -14,12 +15,12 @@ const routes = [
     component: () => import('@/views/AboutView.vue'),
   },
   {
-    path: '/detail/:id?',
+    path: '/detail/:slug?',
     name: 'detail',
     component: () => import('@/components/AirbnbDetail.vue'),
   },
   {
-    path: '/image/:id?',
+    path: '/image/:slug?',
     name: 'image',
     component: () => import('@/components/ImageGallery.vue'),
   },
@@ -36,15 +37,19 @@ const router = createRouter({
   },
 })
 
-// Resolve legacy links once; route IDs make details shareable without browser storage.
+// Keep ID/session-based bookmarks working while all public links use text slugs.
 router.beforeEach(to => {
   if (!['detail', 'image'].includes(to.name)) return
-  let id = to.params.id
-  if (!id) {
-    try { id = JSON.parse(sessionStorage.getItem('unit'))?.id } catch { /* Ignore stale browser data. */ }
-    if (id) return { name: to.name, params: { id: String(id) }, replace: true }
+  let value = to.params.slug
+  if (!value) {
+    try { value = String(JSON.parse(sessionStorage.getItem('unit'))?.id ?? '') } catch { /* Ignore stale browser data. */ }
   }
-  if (!units.some(unit => String(unit.id) === String(id))) return { name: 'home', replace: true }
+  const unit = findUnitByRoute(units, value)
+  if (!unit) return { name: 'home', replace: true }
+  const slug = unitSlug(unit, units)
+  if (to.params.slug !== slug) {
+    return { name: to.name, params: { slug }, query: to.query, hash: to.hash, replace: true }
+  }
 })
 
 export default router

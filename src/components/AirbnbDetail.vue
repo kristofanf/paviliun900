@@ -5,9 +5,10 @@ import units from '@/data/units.json'
 import { categoryForPhoto, imgUrl, isNightly, primaryPhoto } from '@/utils/property'
 import { formatRupiah } from '@/utils/format'
 import UnitInformation from '@/components/unit/UnitInformation.vue'
+import { findUnitByRoute, unitSlug } from '@/utils/unit-slug'
 const route = useRoute()
 const router = useRouter()
-const detailUnit = computed(() => units.find(unit => String(unit.id) === String(route.params.id)))
+const detailUnit = computed(() => findUnitByRoute(units, route.params.slug))
 const nightly = computed(() => detailUnit.value && isNightly(detailUnit.value))
 const nightlyTier = computed(() => detailUnit.value?.harga?.find(tier => ['night', 'malam'].includes(tier.satuan)))
 const photos = computed(() => (detailUnit.value?.gambar || []).filter(Boolean))
@@ -18,7 +19,7 @@ const previewPhotos = computed(() => {
 })
 const contacts = computed(() => detailUnit.value?.order || [])
 const facts = computed(() => detailUnit.value?.fitur || [])
-function openGallery() { router.push({ name: 'image', params: { id: detailUnit.value.id } }) }
+function openGallery() { router.push({ name: 'image', params: { slug: unitSlug(detailUnit.value, units) } }) }
 </script>
 
 <template>
@@ -51,7 +52,7 @@ function openGallery() { router.push({ name: 'image', params: { id: detailUnit.v
       </div>
       <p v-else class="empty-photos">Room photographs will be added here.</p>
       <div v-if="photos.length" class="gallery-actions">
-        <RouterLink class="button button-outline" :to="{ name: 'image', params: { id: detailUnit.id } }">
+        <RouterLink class="button button-outline" :to="{ name: 'image', params: { slug: unitSlug(detailUnit, units) } }">
           <span class="mdi mdi-image-multiple-outline" aria-hidden="true" />
           View all photos ({{ photos.length }})
         </RouterLink>

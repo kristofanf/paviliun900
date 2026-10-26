@@ -13,8 +13,11 @@ npm run dev
 ```
 
 `npm run build` creates `dist`; `npm run preview` serves that production build.
-Unit detail and photo gallery URLs include the unit ID, so they can be shared
-and refreshed without relying on browser storage.
+Unit detail and photo gallery URLs use readable, saved slugs such as
+`/detail/spacious-and-comfortable-airbnb` and
+`/image/spacious-and-comfortable-airbnb`. Old ID links redirect to the matching
+slug in the browser. Slugs stay the same when a unit title is edited in the CMS;
+new units receive unique slugs automatically, including duplicate titles.
 
 ## Local CMS
 

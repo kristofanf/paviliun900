@@ -6,6 +6,38 @@ test.beforeEach(async ({ page }) => {
   await page.route('**/*', route => new URL(route.request().url()).hostname === '127.0.0.1' ? route.continue() : route.abort())
 })
 
+test('text URLs work directly and old ID links redirect without losing query or history', async ({ page }) => {
+  await page.goto('/')
+  await page.goto('/detail/2?source=bookmark#main-content')
+  await expect(page).toHaveURL(/\/detail\/exclusive-and-strategic-apartment\?source=bookmark#main-content$/)
+  await expect(page.locator('.detail-title')).toHaveText(units[1].judul)
+  await page.goBack()
+  await expect(page).toHaveURL(/\/$/)
+  for (const unit of units) {
+    await page.goto(`/detail/${unit.slug}`)
+    await expect(page.locator('.detail-title')).toHaveText(unit.judul)
+    await page.reload()
+    await expect(page.locator('.detail-title')).toHaveText(unit.judul)
+    await page.goto(`/image/${unit.id}`)
+    await expect(page).toHaveURL(new RegExp(`/image/${unit.slug}$`))
+    await expect(page.locator('.gallery')).toHaveCount(unit.gambar.length)
+    await page.getByRole('button', { name: 'Back', exact: true }).click()
+    await expect(page).toHaveURL(new RegExp(`/detail/${unit.slug}$`))
+  }
+})
+
+test('duplicate titles link to distinct units using text suffixes', async ({ page }) => {
+  const duplicate = { ...structuredClone(units[0]), id: 9001, slug: undefined, fitur: ['Distinct duplicate unit'] }
+  await page.route('**/src/data/units.json*', route => route.fulfill({ contentType: 'application/javascript', body: 'export default ' + JSON.stringify([units[0], duplicate]) }))
+  await page.goto('/')
+  const links = page.getByRole('link', { name: 'View unit', exact: true })
+  await expect(links.nth(0)).toHaveAttribute('href', '/detail/spacious-and-comfortable-airbnb')
+  await expect(links.nth(1)).toHaveAttribute('href', '/detail/spacious-and-comfortable-airbnb-2')
+  await links.nth(1).click()
+  await expect(page).toHaveURL(/\/detail\/spacious-and-comfortable-airbnb-2$/)
+  await expect(page.locator('.detail-facts')).toContainText('Distinct duplicate unit')
+})
+
 test('homepage separates stays and compares long-term prices by actual period', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Paviliun 900', exact: true })).toBeVisible()
@@ -49,7 +81,7 @@ test('long-term menu reaches the rental section from desktop and mobile detail p
 })
 
 test('seven long-term units remain accessible in responsive grids with period prices', async ({ page }) => {
-  const rentals = Array.from({ length: 7 }, (_, index) => ({ ...structuredClone(units[1]), id: 9000 + index, judul: `Long-term unit ${index + 1}` }))
+  const rentals = Array.from({ length: 7 }, (_, index) => ({ ...structuredClone(units[1]), slug: undefined, id: 9000 + index, judul: `Long-term unit ${index + 1}` }))
   const data = [units[0], ...rentals]
   await page.route('**/src/data/units.json*', route => route.fulfill({ contentType: 'application/javascript', body: 'export default ' + JSON.stringify(data) }))
   await page.goto('/#long-stays')
@@ -61,10 +93,10 @@ test('seven long-term units remain accessible in responsive grids with period pr
     expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(false)
   }
   await section.getByRole('button', { name: '3 months', exact: true }).click()
-  for (const rental of rentals) {
+  for (const [index, rental] of rentals.entries()) {
     const card = section.locator('.unit-card').filter({ has: page.getByRole('heading', { name: rental.judul, exact: true }) })
     await expect(card.locator('.unit-price')).toHaveText('Rp 15.000.000 / 3 months')
-    await expect(card.getByRole('link', { name: 'View unit', exact: true })).toHaveAttribute('href', `/detail/${rental.id}`)
+    await expect(card.getByRole('link', { name: 'View unit', exact: true })).toHaveAttribute('href', `/detail/long-term-unit-${index + 1}`)
   }
 })
 

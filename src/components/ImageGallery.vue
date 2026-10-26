@@ -4,9 +4,10 @@ import { useRoute, useRouter } from 'vue-router'
 import units from '@/data/units.json'
 import { categoryForPhoto, imgUrl, primaryPhoto } from '@/utils/property'
 import PhotoViewer from '@/components/unit/PhotoViewer.vue'
+import { findUnitByRoute, unitSlug } from '@/utils/unit-slug'
 const route = useRoute()
 const router = useRouter()
-const detailUnit = computed(() => units.find(unit => String(unit.id) === String(route.params.id)))
+const detailUnit = computed(() => findUnitByRoute(units, route.params.slug))
 const photos = computed(() => (detailUnit.value?.gambar || []).filter(Boolean))
 const heroPhoto = computed(() => photos.value.find(name => categoryForPhoto(name) === 'Living & dining') || primaryPhoto(detailUnit.value))
 const categories = computed(() => [...new Set(photos.value.map(categoryForPhoto))].filter(category => category !== 'Other spaces'))
@@ -22,8 +23,8 @@ async function closePhoto() {
   await nextTick()
   if (returnTo?.isConnected) returnTo.focus({ preventScroll: true })
 }
-watch(() => route.params.id, () => { trigger = null; openIndex.value = null; category.value = 'All photos' })
-function back() { router.push({ name: 'detail', params: { id: detailUnit.value.id } }) }
+watch(() => route.params.slug, () => { trigger = null; openIndex.value = null; category.value = 'All photos' })
+function back() { router.push({ name: 'detail', params: { slug: unitSlug(detailUnit.value, units) } }) }
 </script>
 
 <template>

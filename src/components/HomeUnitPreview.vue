@@ -2,8 +2,11 @@
 import { computed } from 'vue'
 import { imgUrl, primaryPhoto, tierFor } from '@/utils/property'
 import { formatRupiah } from '@/utils/format'
+import units from '@/data/units.json'
+import { unitSlug } from '@/utils/unit-slug'
 
 const props = defineProps({ unit: { type: Object, required: true }, period: { type: String, default: '' }, featured: Boolean })
+const detailRoute = computed(() => ({ name: 'detail', params: { slug: unitSlug(props.unit, units) } }))
 const tier = computed(() => tierFor(props.unit, props.period))
 const photo = computed(() => primaryPhoto(props.unit))
 const otherTiers = computed(() => (props.unit.harga || []).filter(item => item.satuan !== props.period))
@@ -12,18 +15,18 @@ const facts = computed(() => (props.unit.fitur || []).filter(item => !/wi-?fi/i.
 
 <template>
   <article class="unit-card" :class="{ 'featured-unit': featured }">
-    <RouterLink class="unit-photo" :to="`/detail/${unit.id}`" :aria-label="`View ${unit.judul}`">
+    <RouterLink class="unit-photo" :to="detailRoute" :aria-label="`View ${unit.judul}`">
       <img v-if="photo" :src="imgUrl(photo)" :alt="unit.judul" loading="lazy" width="800" height="600" />
       <span v-else class="photo-placeholder">Photos coming soon</span>
     </RouterLink>
     <div class="unit-copy">
-      <h2 class="unit-title"><RouterLink :to="`/detail/${unit.id}`">{{ unit.judul }}</RouterLink></h2>
+      <h2 class="unit-title"><RouterLink :to="detailRoute">{{ unit.judul }}</RouterLink></h2>
       <ul class="unit-facts"><li v-for="fact in facts" :key="fact">{{ fact }}</li><li v-if="unit.luas">{{ unit.luas }} m²</li></ul>
       <p class="unit-status">{{ unit.tag }}</p>
       <p class="unit-price" aria-live="polite" aria-atomic="true"><template v-if="tier">{{ formatRupiah(tier.amount) }} <span>/ {{ tier.satuan }}</span></template><template v-else>Contact us for pricing</template></p>
       <p v-if="featured" class="unit-description">A generous living room, your own kitchen, and room for everyone.</p>
       <p v-else-if="otherTiers.length" class="other-prices">Also available: <span v-for="(item, index) in otherTiers" :key="item.satuan">{{ index ? '; ' : '' }}{{ formatRupiah(item.amount) }} / {{ item.satuan }}</span></p>
-      <RouterLink :class="featured ? 'button' : 'text-link'" :to="`/detail/${unit.id}`">View unit <i class="mdi mdi-arrow-right" aria-hidden="true" /></RouterLink>
+      <RouterLink :class="featured ? 'button' : 'text-link'" :to="detailRoute">View unit <i class="mdi mdi-arrow-right" aria-hidden="true" /></RouterLink>
     </div>
   </article>
 </template>
